@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>mse-relatime-player</title>
+    <style>
+        html,body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+        .container {
+            height: 100%;
+        }
+        .container div {
+            height: 100%;
+        }
+        video {
+            height: 100%;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div>
+            <video autoplay muted id="video"></video>
+        </div>
+    </div>
+    <script src="../dist/index.js"></script>
+    <script>
+        const player = new MsePlayer({
+            videoElement: document.getElementById('video'),
+            wsAddress: 'wss://api.cloudtest.qq.com/v1/websocket/video',
+            deviceId: '',
+            testId: '',
+            controlkey: ''
+        });
+    </script>
+</body>
+</html>

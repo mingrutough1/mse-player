@@ -1,11 +1,3 @@
-interface Player{
-    src: string,
-    element: HTMLVideoElement
-}
+import MsePlayer  from "./mse-player";
 
-const player:Player = {
-    src: 'https://fd',
-    element: document.getElementById('test') as HTMLVideoElement
-}
-
-console.log('sdk-init');
+export default MsePlayer;
