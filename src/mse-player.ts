@@ -1,24 +1,30 @@
 
-import { IMsePlayerOption } from './type';
-import { isSafari } from './utils';
+import { IMsePlayerOption, MediaElementType } from './util/type';
+import { isSafari } from './util/utils';
 import { VideoMuxer } from './muxer/video';
 import { AudioMuxer } from './muxer/audio';
 import Jmuxer from 'jmuxer';
-import { WEBSOCKETCMD } from './enum';
+import { WEBSOCKET_CMD, WEBSOCKET_MSG, ROTATE_MSG } from './util/enum';
+
+import Touchpad from './media/touch';
+
 export default class MsePlayer {
     wsAddress: string;
-    videoElement: HTMLVideoElement;
+    videoElement: MediaElementType;
     deviceId: string;
     testId: string;
     controlKey: string;
     enableAudio: boolean = false;
+    rotateValue: ROTATE_MSG = ROTATE_MSG['0degrees'];
     mode: 'video' | 'image' = 'video';
     video: VideoMuxer;
     audio: Jmuxer;
-    muxerQuene: Promise<unknown>[];
+    muxerQuene: Promise<unknown>[] = [];
 
     socket: WebSocket;
     socketHeartBeat: number;
+
+    touchpad: Touchpad;
 
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
@@ -41,13 +47,15 @@ export default class MsePlayer {
     }
 
     checkOptions() {
-        if(!(this.videoElement instanceof HTMLVideoElement)) {
+        if(!(this.videoElement instanceof HTMLVideoElement || this.videoElement instanceof HTMLImageElement)) {
             throw new Error('请传入正确的videoElement');
         }
         // todo  其他必填参数的检测
     }
 
     initVideo() {
+        this.initTouch();
+        this.initKeyboard();
         if(this.mode === 'image') {
             // todo 图片流
             return ;
@@ -75,17 +83,29 @@ export default class MsePlayer {
             await Promise.all(this.muxerQuene);
             this.socket = new WebSocket(this.wsAddress);
             this.socket.binaryType = 'arraybuffer';
-            this.socket.addEventListener('open', this.onSocketOpen);
-            this.socket.addEventListener('message', this.onSocketMessage);
-            this.socket.addEventListener('error', this.onSocketError);
-            this.socket.addEventListener('close', this.onSocketClose);
+            this.socket.addEventListener('open', this.onSocketOpen.bind(this));
+            this.socket.addEventListener('message', this.onSocketMessage.bind(this));
+            this.socket.addEventListener('error', this.onSocketError.bind(this));
+            this.socket.addEventListener('close', this.onSocketClose.bind(this));
         } catch (error) {
             console.error('muxer 初始化失败');
         }
 
     }
 
-    sendCommand(data: object) {
+    initTouch() {
+        this.touchpad = new Touchpad({
+            node: this.videoElement,
+            rotateValue: this.rotateValue,
+            sendCommand: this.sendCommand
+        });
+    }
+
+    initKeyboard() {
+
+    }
+
+    sendCommand = (data: object) => {
         this.socket.send(
             JSON.stringify(Object.assign(data, {
                 device_id: this.deviceId,
@@ -101,17 +121,29 @@ export default class MsePlayer {
         // 心跳逻辑
         this.socketHeartBeat = setInterval(() => {
             this.sendCommand({
-                cmd: WEBSOCKETCMD.CmdHeart,
+                cmd: WEBSOCKET_CMD.CmdHeart,
                 heart: 1
             });
         }, 30000);
 
         this.sendCommand({
-            cmd: WEBSOCKETCMD.CmdStartStream
+            cmd: WEBSOCKET_CMD.CmdStartStream
         });
     }
     onSocketMessage(event: MessageEvent) {
+        const messageData = new Uint8Array(event.data);
+        switch (messageData[0]) {
+            case WEBSOCKET_MSG.H264: 
+            // todo 判断流宽高是否变化，是则重新reset Muxer
+            this.video.muxer.feed({
+                video: messageData
+            });
 
+            break;
+
+            default: 
+            console.warn('useless message data');
+        }
     }
     onSocketError(e) {
         console.error('websocket error', e);

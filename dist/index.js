@@ -21,6 +21,17 @@
     /* global Reflect, Promise, SuppressedError, Symbol */
 
 
+    var __assign = function() {
+        __assign = Object.assign || function __assign(t) {
+            for (var s, i = 1, n = arguments.length; i < n; i++) {
+                s = arguments[i];
+                for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p)) t[p] = s[p];
+            }
+            return t;
+        };
+        return __assign.apply(this, arguments);
+    };
+
     function __awaiter(thisArg, _arguments, P, generator) {
         function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
         return new (P || (P = Promise))(function (resolve, reject) {
@@ -147,30 +158,132 @@
         return AudioMuxer;
     }());
 
-    var WEBSOCKETCMD;
-    (function (WEBSOCKETCMD) {
-        WEBSOCKETCMD["CmdStartStream"] = "startvideo";
-        WEBSOCKETCMD["CmdTouch"] = "touch";
-        WEBSOCKETCMD["CmdPressButton"] = "pressbutton";
-        WEBSOCKETCMD["CmdCapture"] = "capture";
-        WEBSOCKETCMD["CmdHeart"] = "heart";
-        WEBSOCKETCMD["CmdCalcDelay"] = "calcdelay";
-        WEBSOCKETCMD["CmdStopStream"] = "stopvideo";
-        WEBSOCKETCMD["CmdKeyboardInput"] = "keyboard";
-        WEBSOCKETCMD["CmdBridgeCMD"] = "bridgecmd";
-        WEBSOCKETCMD["CmdSetClipBoard"] = "setclipboard";
-        WEBSOCKETCMD["CmdGetClipBoard"] = "getclipboard";
-        WEBSOCKETCMD["CmdUploadFile"] = "uploadfile";
-    })(WEBSOCKETCMD || (WEBSOCKETCMD = {}));
-    var WEBSOCKETMSG;
-    (function (WEBSOCKETMSG) {
-        WEBSOCKETMSG[WEBSOCKETMSG["H264"] = 0] = "H264";
-    })(WEBSOCKETMSG || (WEBSOCKETMSG = {}));
+    var WEBSOCKET_CMD;
+    (function (WEBSOCKET_CMD) {
+        WEBSOCKET_CMD["CmdStartStream"] = "startvideo";
+        WEBSOCKET_CMD["CmdTouch"] = "touch";
+        WEBSOCKET_CMD["CmdPressButton"] = "pressbutton";
+        WEBSOCKET_CMD["CmdCapture"] = "capture";
+        WEBSOCKET_CMD["CmdHeart"] = "heart";
+        WEBSOCKET_CMD["CmdCalcDelay"] = "calcdelay";
+        WEBSOCKET_CMD["CmdStopStream"] = "stopvideo";
+        WEBSOCKET_CMD["CmdKeyboardInput"] = "keyboard";
+        WEBSOCKET_CMD["CmdBridgeCMD"] = "bridgecmd";
+        WEBSOCKET_CMD["CmdSetClipBoard"] = "setclipboard";
+        WEBSOCKET_CMD["CmdGetClipBoard"] = "getclipboard";
+        WEBSOCKET_CMD["CmdUploadFile"] = "uploadfile";
+    })(WEBSOCKET_CMD || (WEBSOCKET_CMD = {}));
+    var PRESS_BUTTON;
+    (function (PRESS_BUTTON) {
+        PRESS_BUTTON[PRESS_BUTTON["home"] = 0] = "home";
+        PRESS_BUTTON[PRESS_BUTTON["recent"] = 1] = "recent";
+        PRESS_BUTTON[PRESS_BUTTON["back"] = 2] = "back";
+    })(PRESS_BUTTON || (PRESS_BUTTON = {}));
+    var TOUCH;
+    (function (TOUCH) {
+        TOUCH[TOUCH["end"] = 0] = "end";
+        TOUCH[TOUCH["start"] = 1] = "start";
+        TOUCH[TOUCH["move"] = 3] = "move";
+    })(TOUCH || (TOUCH = {}));
+    var WEBSOCKET_MSG;
+    (function (WEBSOCKET_MSG) {
+        WEBSOCKET_MSG[WEBSOCKET_MSG["H264"] = 0] = "H264";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["Rotate"] = 1] = "Rotate";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["Screenshot"] = 2] = "Screenshot";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["DelayData"] = 3] = "DelayData";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["Clipboard"] = 4] = "Clipboard";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["FileUploadVal"] = 5] = "FileUploadVal";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["ImageStream"] = 6] = "ImageStream";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["CMDResponse"] = 7] = "CMDResponse";
+    })(WEBSOCKET_MSG || (WEBSOCKET_MSG = {}));
+    var ROTATE_MSG;
+    (function (ROTATE_MSG) {
+        ROTATE_MSG[ROTATE_MSG["0degrees"] = 0] = "0degrees";
+        ROTATE_MSG[ROTATE_MSG["-90degrees"] = 1] = "-90degrees";
+        ROTATE_MSG[ROTATE_MSG["-180degrees"] = 2] = "-180degrees";
+        ROTATE_MSG[ROTATE_MSG["-270degrees"] = 3] = "-270degrees";
+    })(ROTATE_MSG || (ROTATE_MSG = {}));
+
+    var PositonRatio = 100000;
+
+    var Touch = /** @class */ (function () {
+        function Touch(options) {
+            var _this = this;
+            this.hasBind = false;
+            this.touchStart = false;
+            this.rotateValue = ROTATE_MSG["0degrees"];
+            this.handleMousedown = function (e) {
+                _this.touchStart = true;
+                // todo 支持多指
+                var obj = __assign({ cmd: WEBSOCKET_CMD.CmdTouch, ptype: TOUCH.start }, _this.calcPos(e));
+                _this.sendCommand(obj);
+            };
+            this.handleMouseover = function (e) {
+                if (!_this.touchStart)
+                    return;
+                // todo 支持多指
+                var obj = __assign({ cmd: WEBSOCKET_CMD.CmdTouch, ptype: TOUCH.move }, _this.calcPos(e));
+                _this.sendCommand(obj);
+            };
+            this.handleMouseup = function (e) {
+                if (!_this.touchStart)
+                    return;
+                _this.touchStart = false;
+                // todo 支持多指
+                var obj = __assign({ cmd: WEBSOCKET_CMD.CmdTouch, ptype: TOUCH.end }, _this.calcPos(e));
+                _this.sendCommand(obj);
+            };
+            var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand;
+            this.node = node;
+            this.rotateValue = rotateValue;
+            this.sendCommand = sendCommand;
+            this.addListener();
+        }
+        Touch.prototype.addListener = function () {
+            this.node.addEventListener("mousedown", this.handleMousedown); // mousedown 监听视频元素
+            document.addEventListener("mousemove", this.handleMouseover); // mousemove、mouseup 需监听document ，否则鼠标移出画面将不能正常响应
+            document.addEventListener("mouseup", this.handleMouseup);
+            this.hasBind = true;
+        };
+        Touch.prototype.calcPos = function (e) {
+            var rect = this.node.getBoundingClientRect();
+            var width = this.node.offsetWidth;
+            var height = this.node.offsetHeight;
+            var x = e.clientX - rect.left;
+            var y = e.clientY - rect.top;
+            x = Math.floor(x / width * PositonRatio);
+            y = Math.floor(y / height * PositonRatio);
+            return { x: x, y: y };
+        };
+        Touch.prototype.start = function () {
+            if (this.hasBind)
+                return;
+            this.addListener();
+        };
+        Touch.prototype.pause = function () {
+            this.node.removeEventListener("mousedown", this.handleMousedown);
+            document.removeEventListener("mousemove", this.handleMouseover);
+            document.removeEventListener("mouseup", this.handleMouseup);
+            this.hasBind = false;
+        };
+        return Touch;
+    }());
 
     var MsePlayer = /** @class */ (function () {
         function MsePlayer(options) {
+            var _this = this;
             this.enableAudio = false;
+            this.rotateValue = ROTATE_MSG['0degrees'];
             this.mode = 'video';
+            this.muxerQuene = [];
+            this.sendCommand = function (data) {
+                _this.socket.send(JSON.stringify(Object.assign(data, {
+                    device_id: _this.deviceId,
+                    test_id_str: _this.testId,
+                    controlkey: _this.controlKey,
+                    video_config: _this.mode === "image" ? "{\"video_mode\": 2}" : ""
+                })));
+            };
             this.initOption(options);
             this.initVideo();
             this.initAudio();
@@ -188,12 +301,14 @@
             this.checkOptions();
         };
         MsePlayer.prototype.checkOptions = function () {
-            if (!(this.videoElement instanceof HTMLVideoElement)) {
+            if (!(this.videoElement instanceof HTMLVideoElement || this.videoElement instanceof HTMLImageElement)) {
                 throw new Error('请传入正确的videoElement');
             }
             // todo  其他必填参数的检测
         };
         MsePlayer.prototype.initVideo = function () {
+            this.initTouch();
+            this.initKeyboard();
             if (this.mode === 'image') {
                 // todo 图片流
                 return;
@@ -225,10 +340,10 @@
                             _a.sent();
                             this.socket = new WebSocket(this.wsAddress);
                             this.socket.binaryType = 'arraybuffer';
-                            this.socket.addEventListener('open', this.onSocketOpen);
-                            this.socket.addEventListener('message', this.onSocketMessage);
-                            this.socket.addEventListener('error', this.onSocketError);
-                            this.socket.addEventListener('close', this.onSocketClose);
+                            this.socket.addEventListener('open', this.onSocketOpen.bind(this));
+                            this.socket.addEventListener('message', this.onSocketMessage.bind(this));
+                            this.socket.addEventListener('error', this.onSocketError.bind(this));
+                            this.socket.addEventListener('close', this.onSocketClose.bind(this));
                             return [3 /*break*/, 3];
                         case 2:
                             _a.sent();
@@ -239,13 +354,14 @@
                 });
             });
         };
-        MsePlayer.prototype.sendCommand = function (data) {
-            this.socket.send(JSON.stringify(Object.assign(data, {
-                device_id: this.deviceId,
-                test_id_str: this.testId,
-                controlkey: this.controlKey,
-                video_config: this.mode === "image" ? "{\"video_mode\": 2}" : ""
-            })));
+        MsePlayer.prototype.initTouch = function () {
+            this.touchpad = new Touch({
+                node: this.videoElement,
+                rotateValue: this.rotateValue,
+                sendCommand: this.sendCommand
+            });
+        };
+        MsePlayer.prototype.initKeyboard = function () {
         };
         MsePlayer.prototype.onSocketOpen = function () {
             var _this = this;
@@ -253,15 +369,26 @@
             // 心跳逻辑
             this.socketHeartBeat = setInterval(function () {
                 _this.sendCommand({
-                    cmd: WEBSOCKETCMD.CmdHeart,
+                    cmd: WEBSOCKET_CMD.CmdHeart,
                     heart: 1
                 });
             }, 30000);
             this.sendCommand({
-                cmd: WEBSOCKETCMD.CmdStartStream
+                cmd: WEBSOCKET_CMD.CmdStartStream
             });
         };
         MsePlayer.prototype.onSocketMessage = function (event) {
+            var messageData = new Uint8Array(event.data);
+            switch (messageData[0]) {
+                case WEBSOCKET_MSG.H264:
+                    // todo 判断流宽高是否变化，是则重新reset Muxer
+                    this.video.muxer.feed({
+                        video: messageData
+                    });
+                    break;
+                default:
+                    console.warn('useless message data');
+            }
         };
         MsePlayer.prototype.onSocketError = function (e) {
             console.error('websocket error', e);
