@@ -1,8 +1,63 @@
 (function (global, factory) {
-    typeof exports === 'object' && typeof module !== 'undefined' ? module.exports = factory(require('stream')) :
-    typeof define === 'function' && define.amd ? define(['stream'], factory) :
-    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, global.MsePlayer = factory(global.require$$0));
-})(this, (function (require$$0) { 'use strict';
+    typeof exports === 'object' && typeof module !== 'undefined' ? factory(exports, require('stream')) :
+    typeof define === 'function' && define.amd ? define(['exports', 'stream'], factory) :
+    (global = typeof globalThis !== 'undefined' ? globalThis : global || self, factory(global.WetestMsePlayer = {}, global.require$$0));
+})(this, (function (exports, require$$0) { 'use strict';
+
+    var CMD;
+    (function (CMD) {
+        CMD["StartStream"] = "startvideo";
+        CMD["Touch"] = "touch";
+        CMD["PressButton"] = "pressbutton";
+        CMD["Capture"] = "capture";
+        CMD["Heart"] = "heart";
+        CMD["CalcDelay"] = "calcdelay";
+        CMD["StopStream"] = "stopvideo";
+        CMD["KeyboardInput"] = "keyboard";
+        CMD["BridgeCMD"] = "bridgecmd";
+        CMD["SetClipBoard"] = "setclipboard";
+        CMD["GetClipBoard"] = "getclipboard";
+        CMD["UploadFile"] = "uploadfile";
+    })(CMD || (CMD = {}));
+    var PRESS_BUTTON;
+    (function (PRESS_BUTTON) {
+        PRESS_BUTTON[PRESS_BUTTON["Home"] = 0] = "Home";
+        PRESS_BUTTON[PRESS_BUTTON["Recent"] = 1] = "Recent";
+        PRESS_BUTTON[PRESS_BUTTON["Back"] = 2] = "Back";
+    })(PRESS_BUTTON || (PRESS_BUTTON = {}));
+    var TOUCH;
+    (function (TOUCH) {
+        TOUCH[TOUCH["end"] = 0] = "end";
+        TOUCH[TOUCH["start"] = 1] = "start";
+        TOUCH[TOUCH["move"] = 3] = "move";
+    })(TOUCH || (TOUCH = {}));
+    var WEBSOCKET_MSG;
+    (function (WEBSOCKET_MSG) {
+        WEBSOCKET_MSG[WEBSOCKET_MSG["H264"] = 0] = "H264";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["Rotate"] = 1] = "Rotate";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["Screenshot"] = 2] = "Screenshot";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["DelayData"] = 3] = "DelayData";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["Clipboard"] = 4] = "Clipboard";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["FileUploadVal"] = 5] = "FileUploadVal";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["ImageStream"] = 6] = "ImageStream";
+        WEBSOCKET_MSG[WEBSOCKET_MSG["CMDResponse"] = 7] = "CMDResponse";
+    })(WEBSOCKET_MSG || (WEBSOCKET_MSG = {}));
+    var ROTATE_MSG;
+    (function (ROTATE_MSG) {
+        ROTATE_MSG[ROTATE_MSG["0degrees"] = 0] = "0degrees";
+        ROTATE_MSG[ROTATE_MSG["-90degrees"] = 1] = "-90degrees";
+        ROTATE_MSG[ROTATE_MSG["-180degrees"] = 2] = "-180degrees";
+        ROTATE_MSG[ROTATE_MSG["-270degrees"] = 3] = "-270degrees";
+    })(ROTATE_MSG || (ROTATE_MSG = {}));
+
+    var _enum = /*#__PURE__*/Object.freeze({
+        __proto__: null,
+        get CMD () { return CMD; },
+        get PRESS_BUTTON () { return PRESS_BUTTON; },
+        get ROTATE_MSG () { return ROTATE_MSG; },
+        get TOUCH () { return TOUCH; },
+        get WEBSOCKET_MSG () { return WEBSOCKET_MSG; }
+    });
 
     /******************************************************************************
     Copyright (c) Microsoft Corporation.
@@ -78,6 +133,25 @@
     var isSafari = function () {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     };
+    /**
+     * Gets the target node from a native browser event by accounting for
+     * inconsistencies in browser DOM APIs.
+     *
+     * @param {object} nativeEvent Native browser event.
+     * @return {DOMEventTarget} Target node.
+     */
+    function getEventTarget(nativeEvent) {
+        // Fallback to nativeEvent.srcElement for IE9
+        // https://github.com/facebook/react/issues/12506
+        var target = nativeEvent.target || nativeEvent.srcElement || window;
+        // Normalize SVG <use> element events #4963
+        if (target.correspondingUseElement) {
+            target = target.correspondingUseElement;
+        }
+        // Safari may fire events on text nodes (Node.TEXT_NODE is 3).
+        // @see http://www.quirksmode.org/js/events_properties.html
+        return target.nodeType === 3 ? target.parentNode : target;
+    }
 
     var commonjsGlobal = typeof globalThis !== 'undefined' ? globalThis : typeof window !== 'undefined' ? window : typeof global !== 'undefined' ? global : typeof self !== 'undefined' ? self : {};
 
@@ -158,53 +232,10 @@
         return AudioMuxer;
     }());
 
-    var WEBSOCKET_CMD;
-    (function (WEBSOCKET_CMD) {
-        WEBSOCKET_CMD["CmdStartStream"] = "startvideo";
-        WEBSOCKET_CMD["CmdTouch"] = "touch";
-        WEBSOCKET_CMD["CmdPressButton"] = "pressbutton";
-        WEBSOCKET_CMD["CmdCapture"] = "capture";
-        WEBSOCKET_CMD["CmdHeart"] = "heart";
-        WEBSOCKET_CMD["CmdCalcDelay"] = "calcdelay";
-        WEBSOCKET_CMD["CmdStopStream"] = "stopvideo";
-        WEBSOCKET_CMD["CmdKeyboardInput"] = "keyboard";
-        WEBSOCKET_CMD["CmdBridgeCMD"] = "bridgecmd";
-        WEBSOCKET_CMD["CmdSetClipBoard"] = "setclipboard";
-        WEBSOCKET_CMD["CmdGetClipBoard"] = "getclipboard";
-        WEBSOCKET_CMD["CmdUploadFile"] = "uploadfile";
-    })(WEBSOCKET_CMD || (WEBSOCKET_CMD = {}));
-    var PRESS_BUTTON;
-    (function (PRESS_BUTTON) {
-        PRESS_BUTTON[PRESS_BUTTON["home"] = 0] = "home";
-        PRESS_BUTTON[PRESS_BUTTON["recent"] = 1] = "recent";
-        PRESS_BUTTON[PRESS_BUTTON["back"] = 2] = "back";
-    })(PRESS_BUTTON || (PRESS_BUTTON = {}));
-    var TOUCH;
-    (function (TOUCH) {
-        TOUCH[TOUCH["end"] = 0] = "end";
-        TOUCH[TOUCH["start"] = 1] = "start";
-        TOUCH[TOUCH["move"] = 3] = "move";
-    })(TOUCH || (TOUCH = {}));
-    var WEBSOCKET_MSG;
-    (function (WEBSOCKET_MSG) {
-        WEBSOCKET_MSG[WEBSOCKET_MSG["H264"] = 0] = "H264";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["Rotate"] = 1] = "Rotate";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["Screenshot"] = 2] = "Screenshot";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["DelayData"] = 3] = "DelayData";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["Clipboard"] = 4] = "Clipboard";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["FileUploadVal"] = 5] = "FileUploadVal";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["ImageStream"] = 6] = "ImageStream";
-        WEBSOCKET_MSG[WEBSOCKET_MSG["CMDResponse"] = 7] = "CMDResponse";
-    })(WEBSOCKET_MSG || (WEBSOCKET_MSG = {}));
-    var ROTATE_MSG;
-    (function (ROTATE_MSG) {
-        ROTATE_MSG[ROTATE_MSG["0degrees"] = 0] = "0degrees";
-        ROTATE_MSG[ROTATE_MSG["-90degrees"] = 1] = "-90degrees";
-        ROTATE_MSG[ROTATE_MSG["-180degrees"] = 2] = "-180degrees";
-        ROTATE_MSG[ROTATE_MSG["-270degrees"] = 3] = "-270degrees";
-    })(ROTATE_MSG || (ROTATE_MSG = {}));
-
     var PositonRatio = 100000;
+    var NoKeyPressEventCode = [
+        8, // Backspace
+    ];
 
     var Touch = /** @class */ (function () {
         function Touch(options) {
@@ -215,14 +246,14 @@
             this.handleMousedown = function (e) {
                 _this.touchStart = true;
                 // todo 支持多指
-                var obj = __assign({ cmd: WEBSOCKET_CMD.CmdTouch, ptype: TOUCH.start }, _this.calcPos(e));
+                var obj = __assign({ cmd: CMD.Touch, ptype: TOUCH.start }, _this.calcPos(e));
                 _this.sendCommand(obj);
             };
             this.handleMouseover = function (e) {
                 if (!_this.touchStart)
                     return;
                 // todo 支持多指
-                var obj = __assign({ cmd: WEBSOCKET_CMD.CmdTouch, ptype: TOUCH.move }, _this.calcPos(e));
+                var obj = __assign({ cmd: CMD.Touch, ptype: TOUCH.move }, _this.calcPos(e));
                 _this.sendCommand(obj);
             };
             this.handleMouseup = function (e) {
@@ -230,7 +261,7 @@
                     return;
                 _this.touchStart = false;
                 // todo 支持多指
-                var obj = __assign({ cmd: WEBSOCKET_CMD.CmdTouch, ptype: TOUCH.end }, _this.calcPos(e));
+                var obj = __assign({ cmd: CMD.Touch, ptype: TOUCH.end }, _this.calcPos(e));
                 _this.sendCommand(obj);
             };
             var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand;
@@ -251,8 +282,8 @@
             var height = this.node.offsetHeight;
             var x = e.clientX - rect.left;
             var y = e.clientY - rect.top;
-            x = Math.floor(x / width * PositonRatio);
-            y = Math.floor(y / height * PositonRatio);
+            x = Math.floor((x / width) * PositonRatio);
+            y = Math.floor((y / height) * PositonRatio);
             return { x: x, y: y };
         };
         Touch.prototype.start = function () {
@@ -269,6 +300,57 @@
         return Touch;
     }());
 
+    var KeyBoard = /** @class */ (function () {
+        function KeyBoard(options) {
+            var _this = this;
+            this.hasBind = false;
+            this.handleKeydown = function (e) {
+                if (NoKeyPressEventCode.includes(e.keyCode)) {
+                    _this.send(e);
+                }
+            };
+            this.handleKeypress = function (e) {
+                _this.send(e);
+            };
+            this.handleKeyup = function (e) {
+                // this.sendCommand({
+                //     cmd: CMD.KeyboardInput,
+                //     key_code: e.keyCode,
+                // })
+            };
+            var sendCommand = options.sendCommand;
+            this.sendCommand = sendCommand;
+            this.addListener();
+        }
+        KeyBoard.prototype.addListener = function () {
+            window.addEventListener("keydown", this.handleKeydown); // 响应不会触发keypress 的修饰键 如Backspace、
+            window.addEventListener("keypress", this.handleKeypress); // 响应正常的键盘输入
+            // window.addEventListener("keyup", this.handleKeyup);
+            this.hasBind = true;
+        };
+        KeyBoard.prototype.send = function (e) {
+            var tagName = getEventTarget(e).tagName;
+            if (tagName === 'INPUT' || tagName === 'TEXTAREA' || tagName === 'SELECT')
+                return; // 表单输入时，停止发送事件
+            this.sendCommand({
+                cmd: CMD.KeyboardInput,
+                key_code: e.keyCode,
+            });
+        };
+        KeyBoard.prototype.start = function () {
+            if (this.hasBind)
+                return;
+            this.addListener();
+        };
+        KeyBoard.prototype.pause = function () {
+            window.removeEventListener("keydown", this.handleKeydown);
+            window.removeEventListener("keypress", this.handleKeypress);
+            window.removeEventListener("keyup", this.handleKeyup);
+            this.hasBind = false;
+        };
+        return KeyBoard;
+    }());
+
     var MsePlayer = /** @class */ (function () {
         function MsePlayer(options) {
             var _this = this;
@@ -277,10 +359,12 @@
             this.mode = 'video';
             this.muxerQuene = [];
             this.sendCommand = function (data) {
+                console.log(data);
                 _this.socket.send(JSON.stringify(Object.assign(data, {
                     device_id: _this.deviceId,
                     test_id_str: _this.testId,
                     controlkey: _this.controlKey,
+                    adminkey: _this.adminKey,
                     video_config: _this.mode === "image" ? "{\"video_mode\": 2}" : ""
                 })));
             };
@@ -290,12 +374,13 @@
             this.initWebSocket();
         }
         MsePlayer.prototype.initOption = function (options) {
-            var wsAddress = options.wsAddress, videoElement = options.videoElement, deviceId = options.deviceId, testId = options.testId, controlKey = options.controlKey, enableAudio = options.enableAudio, mode = options.mode;
+            var wsAddress = options.wsAddress, videoElement = options.videoElement, deviceId = options.deviceId, testId = options.testId, controlKey = options.controlKey, adminKey = options.adminKey, enableAudio = options.enableAudio, mode = options.mode;
             this.wsAddress = wsAddress;
             this.videoElement = videoElement;
             this.deviceId = deviceId;
             this.testId = testId;
             this.controlKey = controlKey;
+            this.adminKey = adminKey;
             this.enableAudio = !!enableAudio;
             this.mode = mode;
             this.checkOptions();
@@ -362,6 +447,9 @@
             });
         };
         MsePlayer.prototype.initKeyboard = function () {
+            this.keyboard = new KeyBoard({
+                sendCommand: this.sendCommand
+            });
         };
         MsePlayer.prototype.onSocketOpen = function () {
             var _this = this;
@@ -369,12 +457,12 @@
             // 心跳逻辑
             this.socketHeartBeat = setInterval(function () {
                 _this.sendCommand({
-                    cmd: WEBSOCKET_CMD.CmdHeart,
+                    cmd: CMD.Heart,
                     heart: 1
                 });
             }, 30000);
             this.sendCommand({
-                cmd: WEBSOCKET_CMD.CmdStartStream
+                cmd: CMD.StartStream
             });
         };
         MsePlayer.prototype.onSocketMessage = function (event) {
@@ -401,6 +489,7 @@
         return MsePlayer;
     }());
 
-    return MsePlayer;
+    exports.Enum = _enum;
+    exports.MsePlayer = MsePlayer;
 
 }));

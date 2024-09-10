@@ -8,6 +8,7 @@ export interface IMsePlayerOption  {
     deviceId: string;
     testId: string;
     controlKey: string;
+    adminKey?: string;
     enableAudio?: Boolean;
     mode: 'video' | 'image';
 }
@@ -25,5 +26,8 @@ export interface ITouchOptions {
     node: MediaElementType;
     rotateValue: ROTATE_MSG;
     sendCommand: (object) => void;
+}
 
+export interface IKeyBoardOptions {
+    sendCommand: (object) => void;
 }

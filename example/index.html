@@ -5,37 +5,49 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>mse-relatime-player</title>
     <style>
-        html,body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-        }
         .container {
-            height: 100%;
+            display: flex;
+            height: 100vh;
         }
-        .container div {
-            height: 100%;
+        .panel{
+            display: flex;
+            align-items: center;
+            height: 100vh;
+            margin-left: 20px;
         }
-        video {
-            height: 100%;
+        #video{
+            border: 4px solid black;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div>
-            <video autoplay muted id="video"></video>
+            <video autoplay muted id="video" style="width: 400px;"></video>
+        </div>
+        <div class="panel">
+            <button onclick="sendCommond('home')">HOME</button>
         </div>
     </div>
     <script src="../dist/index.js"></script>
-    <script>
+    <script >
+
+        const { MsePlayer, Enum: { CMD, PRESS_BUTTON }} = WetestMsePlayer;
         const player = new MsePlayer({
             videoElement: document.getElementById('video'),
             wsAddress: 'wss://api.cloudtest.qq.com/v1/websocket/video',
-            deviceId: 569,
-            testId: "2024090900118900",
-            controlKey: "2024090900118900-569-12b76d4e-eeb9-4052-8e52-6024528a3862"
+            deviceId: 1347,
+            testId: "0",
+            adminKey: "1347-1725968033-33e2e792-7f8f-4d97-ab59-940c0e785a8f"
         });
+
+        function sendCommond(val) {
+            player.sendCommand({
+                cmd: CMD.PressButton,
+                btype: PRESS_BUTTON.Home
+            });
+        }
     </script>
 </body>
 </html>

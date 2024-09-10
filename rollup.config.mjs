@@ -7,7 +7,7 @@ export default {
   output: {
     file: './dist/index.js',
     format: 'umd',
-    name: 'MsePlayer'
+    name: 'WetestMsePlayer'
   },
   plugins: [
     commonjs(),

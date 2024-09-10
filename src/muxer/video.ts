@@ -1,8 +1,8 @@
 import JMuxer from 'jmuxer';
 
-import { IVideoMuxer } from '../util/type'
+import { IVideoMuxer, MediaElementType } from '../util/type'
 export class VideoMuxer {
-    node: HTMLVideoElement;
+    node: MediaElementType;
     muxer: JMuxer;
 
     constructor(options: IVideoMuxer ){

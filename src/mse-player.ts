@@ -4,9 +4,10 @@ import { isSafari } from './util/utils';
 import { VideoMuxer } from './muxer/video';
 import { AudioMuxer } from './muxer/audio';
 import Jmuxer from 'jmuxer';
-import { WEBSOCKET_CMD, WEBSOCKET_MSG, ROTATE_MSG } from './util/enum';
+import { CMD, WEBSOCKET_MSG, ROTATE_MSG } from './util/enum';
 
 import Touchpad from './media/touch';
+import Keyboard from './media/keyboard';
 
 export default class MsePlayer {
     wsAddress: string;
@@ -14,6 +15,7 @@ export default class MsePlayer {
     deviceId: string;
     testId: string;
     controlKey: string;
+    adminKey: string;
     enableAudio: boolean = false;
     rotateValue: ROTATE_MSG = ROTATE_MSG['0degrees'];
     mode: 'video' | 'image' = 'video';
@@ -25,6 +27,7 @@ export default class MsePlayer {
     socketHeartBeat: number;
 
     touchpad: Touchpad;
+    keyboard: Keyboard;
 
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
@@ -34,12 +37,13 @@ export default class MsePlayer {
     }
 
     initOption(options: IMsePlayerOption) {
-        const { wsAddress, videoElement, deviceId, testId, controlKey, enableAudio, mode } = options;
+        const { wsAddress, videoElement, deviceId, testId, controlKey, adminKey, enableAudio, mode } = options;
         this.wsAddress = wsAddress;
         this.videoElement = videoElement;
         this.deviceId = deviceId;
         this.testId = testId;
         this.controlKey = controlKey;
+        this.adminKey = adminKey;
         this.enableAudio = !!enableAudio;
         this.mode = mode;
 
@@ -103,14 +107,19 @@ export default class MsePlayer {
 
     initKeyboard() {
 
+        this.keyboard = new Keyboard({
+            sendCommand: this.sendCommand
+        })
     }
 
     sendCommand = (data: object) => {
+        console.log(data);
         this.socket.send(
             JSON.stringify(Object.assign(data, {
                 device_id: this.deviceId,
                 test_id_str: this.testId,
                 controlkey: this.controlKey,
+                adminkey: this.adminKey,
                 video_config: this.mode === "image" ? "{\"video_mode\": 2}" : ""
             })),
         );
@@ -121,13 +130,13 @@ export default class MsePlayer {
         // 心跳逻辑
         this.socketHeartBeat = setInterval(() => {
             this.sendCommand({
-                cmd: WEBSOCKET_CMD.CmdHeart,
+                cmd: CMD.Heart,
                 heart: 1
             });
         }, 30000);
 
         this.sendCommand({
-            cmd: WEBSOCKET_CMD.CmdStartStream
+            cmd: CMD.StartStream
         });
     }
     onSocketMessage(event: MessageEvent) {
