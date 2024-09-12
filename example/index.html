@@ -11,23 +11,37 @@
         }
         .panel{
             display: flex;
+            flex-direction: column;
             align-items: center;
+            justify-content: center;
             height: 100vh;
             margin-left: 20px;
+        }
+        .panel button {
+            margin: 10px 0;
         }
         #video{
             border: 4px solid black;
             border-radius: 8px;
+        }
+        #audio{
+            display: block;
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div>
+            <audio id="audio" controls></audio>
             <video autoplay muted id="video" style="width: 400px;"></video>
         </div>
         <div class="panel">
-            <button onclick="sendCommond('home')">HOME</button>
+            <button onclick="sendCommond(0)">HOME</button>
+            <button onclick="sendCommond(1)">MENU</button>
+            <button onclick="sendCommond(2)">BACK</button>
+            <button onclick="playAudio()">音频-播放</button>
+            <button onclick="mute(true)">音频-静音</button>
+            <button onclick="mute(false)">音频-取消静音</button>
         </div>
     </div>
     <script src="../dist/index.js"></script>
@@ -36,17 +50,25 @@
         const { MsePlayer, Enum: { CMD, PRESS_BUTTON }} = WetestMsePlayer;
         const player = new MsePlayer({
             videoElement: document.getElementById('video'),
+            audioElement: document.getElementById('audio'),
             wsAddress: 'wss://api.cloudtest.qq.com/v1/websocket/video',
-            deviceId: 1347,
+            deviceId: 811,
             testId: "0",
-            adminKey: "1347-1725968033-33e2e792-7f8f-4d97-ab59-940c0e785a8f"
+            adminKey: "811-1726094587-71f88dff-e43a-4a85-9a5e-1e0972697c2f"
         });
 
-        function sendCommond(val) {
+        function sendCommond(btype) {
             player.sendCommand({
                 cmd: CMD.PressButton,
-                btype: PRESS_BUTTON.Home
+                btype,
             });
+        }
+
+        function playAudio() {
+            player.audio.play();
+        }
+        function mute(muted) {
+            player.audio.mute(muted);
         }
     </script>
 </body>

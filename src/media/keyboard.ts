@@ -15,7 +15,7 @@ export default class KeyBoard {
   addListener() {
     window.addEventListener("keydown", this.handleKeydown);// 响应不会触发keypress 的修饰键 如Backspace、
     window.addEventListener("keypress", this.handleKeypress);// 响应正常的键盘输入
-    // window.addEventListener("keyup", this.handleKeyup);
+    // todo 监听剪切板事件并实现ctrl+v 输入
     this.hasBind = true;
   }
 
@@ -38,13 +38,6 @@ export default class KeyBoard {
     this.send(e);
   };
 
-  handleKeyup = (e: KeyboardEvent) => {
-    // this.sendCommand({
-    //     cmd: CMD.KeyboardInput,
-    //     key_code: e.keyCode,
-    // })
-  };
-
   start() {
     if (this.hasBind) return;
     this.addListener();
@@ -53,7 +46,6 @@ export default class KeyBoard {
   pause() {
     window.removeEventListener("keydown", this.handleKeydown);
     window.removeEventListener("keypress", this.handleKeypress);
-    window.removeEventListener("keyup", this.handleKeyup);
     this.hasBind = false;
   }
 }

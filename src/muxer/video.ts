@@ -5,7 +5,7 @@ export class VideoMuxer {
     node: MediaElementType;
     muxer: JMuxer;
 
-    constructor(options: IVideoMuxer ){
+    constructor(options: IVideoMuxer) {
         const { node } = options;
         this.node = node;
     }
@@ -22,7 +22,7 @@ export class VideoMuxer {
                 checkDelay: 5000,
                 maxDelay: 1000,
                 onReady: isReset => {
-                    if(isReset) {
+                    if (isReset) {
                         // todo, jmuxer reset 重新send cmd startvideo 获取关键帧
                     } else {
                         resolve(true)
@@ -32,7 +32,7 @@ export class VideoMuxer {
                     console.error('video buffer related errors:', error);
                 },
                 onMissingVideoFrames: error => {
-                    console.error('missing audio frames:', error);
+                    console.error('missing video frames:', error);
                 },
             });
         });

@@ -14,8 +14,8 @@ export enum CMD {
 }
 
 export enum PRESS_BUTTON {
-    Home, // 返回主页
-    Recent,// 打开最近应用
+    Home, // 主页
+    Menu,// 
     Back, // 返回
 }
 
@@ -26,7 +26,7 @@ export enum TOUCH {
 }
 
 
-export enum WEBSOCKET_MSG {
+export enum MSG {
   H264, // h264
   Rotate, // 旋转
   Screenshot, // 截图
@@ -35,6 +35,7 @@ export enum WEBSOCKET_MSG {
   FileUploadVal, // 文件上传返回值
   ImageStream,// 图片流
   CMDResponse, // cmd 返回值
+  AAC = 255, // 音频
 }
 export enum ROTATE_MSG {
     '0degrees',

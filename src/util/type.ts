@@ -9,13 +9,13 @@ export interface IMsePlayerOption  {
     testId: string;
     controlKey: string;
     adminKey?: string;
-    enableAudio?: Boolean;
+    audioElement?: HTMLAudioElement;
     mode: 'video' | 'image';
 }
 
 
 export interface IAudioMuxer{
-    node: HTMLVideoElement;
+    node: HTMLAudioElement;
 }
 
 export interface IVideoMuxer{
