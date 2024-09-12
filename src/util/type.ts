@@ -20,6 +20,7 @@ export interface IAudioMuxer{
 
 export interface IVideoMuxer{
     node: MediaElementType;
+    rotateValue: ROTATE_MSG
 }
 
 export interface ITouchOptions {

@@ -1,15 +1,37 @@
 import JMuxer from 'jmuxer';
 
 import { IVideoMuxer, MediaElementType } from '../util/type'
+import { ROTATE_MSG } from '../util/enum';
 export class VideoMuxer {
     node: MediaElementType;
     muxer: JMuxer;
-
+    rotateValue: ROTATE_MSG;
     constructor(options: IVideoMuxer) {
-        const { node } = options;
+        const { node, rotateValue } = options;
         this.node = node;
+        this.rotateValue = rotateValue;
+        this.addListener();
     }
 
+    addListener() {
+        window.addEventListener('resize', () => {
+            this.setVideoElementBound();
+        });
+    }
+
+    setVideoElementBound() {
+
+        const parentWidth = this.node.parentElement.offsetWidth;
+        const parentHeight = this.node.parentElement.offsetHeight;
+
+        if(this.rotateValue % 2 === 0) {
+            this.node.style.maxWidth = `${parentWidth}px`;
+            this.node.style.maxHeight = `${parentHeight}px`;
+        } else {
+            this.node.style.maxWidth = `${parentHeight}px`;
+            this.node.style.maxHeight = `${parentWidth}px`;
+        }
+    }
     init() {
         return new Promise((resolve) => {
             this.muxer = new JMuxer({

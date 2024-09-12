@@ -3,10 +3,12 @@ import { isSafari } from "./util/utils";
 import { VideoMuxer } from "./muxer/video";
 import { AudioMuxer } from "./muxer/audio";
 import Jmuxer from "jmuxer";
-import { CMD, MSG, ROTATE_MSG } from "./util/enum";
+import { CMD, MSG, ROTATE_MSG, EEvent } from "./util/enum";
 
 import Touchpad from "./media/touch";
 import Keyboard from "./media/keyboard";
+
+import eventEmiter from './util/event-bus';
 
 export default class MsePlayer {
     wsAddress: string;
@@ -16,17 +18,18 @@ export default class MsePlayer {
     testId: string;
     controlKey: string;
     adminKey: string;
-    rotateValue: ROTATE_MSG = ROTATE_MSG["0degrees"];
     mode: "video" | "image" = "video";
     video: VideoMuxer;
     audio: Jmuxer;
     muxerQuene: Promise<unknown>[] = [];
-
+    private _rotateValue: ROTATE_MSG = ROTATE_MSG["0degrees"];
     socket: WebSocket;
     socketHeartBeat: number;
 
     touchpad: Touchpad;
     keyboard: Keyboard;
+
+    event = eventEmiter;
 
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
@@ -35,6 +38,16 @@ export default class MsePlayer {
         this.initWebSocket();
     }
 
+    get rotateValue(): ROTATE_MSG {
+        return this._rotateValue;
+    }
+    set rotateValue(value) {
+        this._rotateValue = value;
+        // 通过set 来实现 rotateValue 在其他class 中的状态同步
+        this.video.rotateValue = value;
+        this.touchpad.rotateValue = value;
+        eventEmiter.emit(EEvent.Rotate, value);
+    }
     initOption(options: IMsePlayerOption) {
         const {
             wsAddress,
@@ -79,6 +92,7 @@ export default class MsePlayer {
         }
         this.video = new VideoMuxer({
             node: this.videoElement,
+            rotateValue: this.rotateValue
         });
         this.muxerQuene.push(this.video.init());
     }
@@ -139,6 +153,19 @@ export default class MsePlayer {
         );
     };
 
+    rotate = (rotateValue) => {
+        if(typeof rotateValue !== 'number') {
+            this.rotateValue++;
+        } else {
+            this.rotateValue = rotateValue;
+        }
+        this.videoElement.style.transform = `rotate(${this.rotateValue * - 90}deg)`;
+
+        this.video.setVideoElementBound();
+
+    }
+
+    
     onSocketOpen() {
         console.log("websocket open");
         // 心跳逻辑
@@ -170,8 +197,12 @@ export default class MsePlayer {
                 });
                 break;
 
+            case MSG.Rotate:
+                console.log('rotate', messageData[4]);
+                this.rotate(messageData[4]);
+
             default:
-                console.warn("useless message data");
+                // console.warn("useless message data");
         }
     }
     onSocketError(e) {

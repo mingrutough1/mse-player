@@ -1,3 +1,9 @@
+
+
+export enum EEvent{
+  Rotate = 'rotate'
+}
+
 export enum CMD {
   StartStream = "startvideo", // 开启视频流
   Touch = "touch", // 点击画面
@@ -20,9 +26,9 @@ export enum PRESS_BUTTON {
 }
 
 export enum TOUCH {
-  end, // touch end
-  start, // touch start
-  move = 3, //touch move
+  End, // touch end
+  Start, // touch start
+  Move = 3, //touch move
 }
 
 

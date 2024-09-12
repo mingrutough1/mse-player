@@ -9,6 +9,18 @@
             display: flex;
             height: 100vh;
         }
+        .video-container{
+            width: 600px;
+            height: 80vh;
+            background: #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        #video{
+            max-width: 100%;
+            max-height: 100%;
+        }
         .panel{
             display: flex;
             flex-direction: column;
@@ -20,25 +32,23 @@
         .panel button {
             margin: 10px 0;
         }
-        #video{
-            border: 4px solid black;
-            border-radius: 8px;
-        }
         #audio{
             display: block;
+            margin-bottom: 10px;
         }
     </style>
 </head>
 <body>
+    <audio id="audio" controls></audio>
     <div class="container">
-        <div>
-            <audio id="audio" controls></audio>
-            <video autoplay muted id="video" style="width: 400px;"></video>
+        <div class="video-container">
+            <video autoplay muted id="video"></video>
         </div>
         <div class="panel">
             <button onclick="sendCommond(0)">HOME</button>
             <button onclick="sendCommond(1)">MENU</button>
             <button onclick="sendCommond(2)">BACK</button>
+            <button onclick="rotate()">旋转</button>
             <button onclick="playAudio()">音频-播放</button>
             <button onclick="mute(true)">音频-静音</button>
             <button onclick="mute(false)">音频-取消静音</button>
@@ -47,14 +57,17 @@
     <script src="../dist/index.js"></script>
     <script >
 
-        const { MsePlayer, Enum: { CMD, PRESS_BUTTON }} = WetestMsePlayer;
+        const { MsePlayer, Enum: { CMD, PRESS_BUTTON, EEvent }} = WetestMsePlayer;
         const player = new MsePlayer({
             videoElement: document.getElementById('video'),
             audioElement: document.getElementById('audio'),
             wsAddress: 'wss://api.cloudtest.qq.com/v1/websocket/video',
             deviceId: 811,
             testId: "0",
-            adminKey: "811-1726094587-71f88dff-e43a-4a85-9a5e-1e0972697c2f"
+            adminKey: "811-1726130603-d0a9e135-98ea-49aa-9e8e-278eea385617"
+        });
+        player.event.on(EEvent.Rotate, (value) => {
+            console.log('on rotate', value);
         });
 
         function sendCommond(btype) {
@@ -64,6 +77,9 @@
             });
         }
 
+        function rotate() {
+            player.rotate();
+        }
         function playAudio() {
             player.audio.play();
         }
