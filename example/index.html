@@ -62,9 +62,10 @@
             videoElement: document.getElementById('video'),
             audioElement: document.getElementById('audio'),
             wsAddress: 'wss://api.cloudtest.qq.com/v1/websocket/video',
-            deviceId: 811,
+            deviceId: 13738,
             testId: "0",
-            adminKey: "811-1726130603-d0a9e135-98ea-49aa-9e8e-278eea385617"
+            adminKey: "13738-1726118927-59c96550-b684-4b36-be67-6e76ed2c3bc7",
+            disableAutoRotate: true
         });
         player.event.on(EEvent.Rotate, (value) => {
             console.log('on rotate', value);

@@ -1,15 +1,17 @@
 import JMuxer from 'jmuxer';
 
 import { IVideoMuxer, MediaElementType } from '../util/type'
-import { ROTATE_MSG } from '../util/enum';
+import { ROTATE_MSG, CMD } from '../util/enum';
 export class VideoMuxer {
     node: MediaElementType;
     muxer: JMuxer;
     rotateValue: ROTATE_MSG;
+    sendCommand: (object) => void;
     constructor(options: IVideoMuxer) {
-        const { node, rotateValue } = options;
+        const { node, rotateValue, sendCommand } = options;
         this.node = node;
         this.rotateValue = rotateValue;
+        this.sendCommand = sendCommand;
         this.addListener();
     }
 
@@ -32,6 +34,12 @@ export class VideoMuxer {
             this.node.style.maxHeight = `${parentWidth}px`;
         }
     }
+    reset = () => {
+        this.muxer.reset();
+        this.sendCommand({
+            cmd: CMD.StartStream,
+        });
+    }
     init() {
         return new Promise((resolve) => {
             this.muxer = new JMuxer({
@@ -52,6 +60,7 @@ export class VideoMuxer {
                 },
                 onError: error => {
                     console.error('video buffer related errors:', error);
+                    this.reset();
                 },
                 onMissingVideoFrames: error => {
                     console.error('missing video frames:', error);

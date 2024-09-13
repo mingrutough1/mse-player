@@ -10,6 +10,7 @@ export interface IMsePlayerOption  {
     controlKey: string;
     adminKey?: string;
     audioElement?: HTMLAudioElement;
+    disableAutoRotate?: Boolean;
     mode: 'video' | 'image';
 }
 
@@ -21,6 +22,7 @@ export interface IAudioMuxer{
 export interface IVideoMuxer{
     node: MediaElementType;
     rotateValue: ROTATE_MSG
+    sendCommand: (object) => void;
 }
 
 export interface ITouchOptions {

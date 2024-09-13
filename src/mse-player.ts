@@ -26,6 +26,7 @@ export default class MsePlayer {
     socket: WebSocket;
     socketHeartBeat: number;
 
+    disableAutoRotate: Boolean = false;
     touchpad: Touchpad;
     keyboard: Keyboard;
 
@@ -42,11 +43,11 @@ export default class MsePlayer {
         return this._rotateValue;
     }
     set rotateValue(value) {
-        this._rotateValue = value;
+        this._rotateValue = value % 4;
         // 通过set 来实现 rotateValue 在其他class 中的状态同步
-        this.video.rotateValue = value;
-        this.touchpad.rotateValue = value;
-        eventEmiter.emit(EEvent.Rotate, value);
+        this.video.rotateValue = this._rotateValue;
+        this.touchpad.rotateValue = this._rotateValue;
+        eventEmiter.emit(EEvent.Rotate, this._rotateValue);
     }
     initOption(options: IMsePlayerOption) {
         const {
@@ -58,6 +59,7 @@ export default class MsePlayer {
             controlKey,
             adminKey,
             mode,
+            disableAutoRotate
         } = options;
         this.wsAddress = wsAddress;
         this.videoElement = videoElement;
@@ -67,6 +69,7 @@ export default class MsePlayer {
         this.controlKey = controlKey;
         this.adminKey = adminKey;
         this.mode = mode;
+        this.disableAutoRotate = disableAutoRotate;
 
         this.checkOptions();
     }
@@ -92,7 +95,8 @@ export default class MsePlayer {
         }
         this.video = new VideoMuxer({
             node: this.videoElement,
-            rotateValue: this.rotateValue
+            rotateValue: this.rotateValue,
+            sendCommand: this.sendCommand,
         });
         this.muxerQuene.push(this.video.init());
     }
@@ -198,9 +202,10 @@ export default class MsePlayer {
                 break;
 
             case MSG.Rotate:
+                if(this.disableAutoRotate) break; // 安卓14及 以上不做自动旋转
                 console.log('rotate', messageData[4]);
                 this.rotate(messageData[4]);
-
+                break;
             default:
                 // console.warn("useless message data");
         }
