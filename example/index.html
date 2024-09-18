@@ -1,92 +1,154 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mse-relatime-player</title>
     <style>
-        .container {
-            display: flex;
-            height: 100vh;
-        }
-        .video-container{
-            width: 600px;
-            height: 80vh;
-            background: #f0f0f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        #video{
-            max-width: 100%;
-            max-height: 100%;
-        }
-        .panel{
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin-left: 20px;
-        }
-        .panel button {
-            margin: 10px 0;
-        }
-        #audio{
-            display: block;
-            margin-bottom: 10px;
-        }
+      .container {
+        display: flex;
+      }
+      .video-container {
+        width: 600px;
+        height: 80vh;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      #video {
+        max-width: 100%;
+        max-height: 100%;
+      }
+      .operate-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        height: 80vh;
+        margin-left: 20px;
+      }
+      .operate-container button {
+        margin: 10px 0;
+      }
+      #audio {
+        display: block;
+        margin-top: 10px;
+      }
+      .input-container {
+        height: 80vh;
+        margin-left: 20px;
+      }
+      .key-params {
+        margin-bottom: 10px;
+        width: fit-content;
+      }
+      .video-container,
+      .operate-container,
+      .input-container,
+      .key-params {
+        padding: 10px;
+        background: #f0f0f0;
+      }
     </style>
-</head>
-<body>
-    <audio id="audio" controls></audio>
-    <div class="container">
-        <div class="video-container">
-            <video autoplay muted id="video"></video>
-        </div>
-        <div class="panel">
-            <button onclick="sendCommond(0)">HOME</button>
-            <button onclick="sendCommond(1)">MENU</button>
-            <button onclick="sendCommond(2)">BACK</button>
-            <button onclick="rotate()">旋转</button>
-            <button onclick="playAudio()">音频-播放</button>
-            <button onclick="mute(true)">音频-静音</button>
-            <button onclick="mute(false)">音频-取消静音</button>
-        </div>
+  </head>
+  <body>
+    <div class="key-params">
+      <label for="deviceID">deviceID:</label>
+      <input type="text" name="deviceID" id="deviceID" />
+
+      <label for="controlKey">controlKey:</label>
+      <input type="text" name="controlKey" id="controlKey" />
+
+      <label for="testId">testId:</label>
+      <input type="text" name="testId" id="testId" />
+
+      <label for="adminKey">adminKey:</label>
+      <input type="text" name="adminKey" id="adminKey" />
+
+      <button onclick="startPlay()">开始投屏</button>
     </div>
+    <div class="container">
+      <div class="video-container">
+        <video autoplay muted id="video"></video>
+      </div>
+      <div class="operate-container">
+        <button onclick="sendCommond(0)">HOME</button>
+        <button onclick="sendCommond(1)">MENU</button>
+        <button onclick="sendCommond(2)">BACK</button>
+        <button onclick="rotate()">旋转</button>
+        <button onclick="screenshot()">截图</button>
+        <button onclick="calDelay()">计算延时</button>
+        <button onclick="playAudio()">音频-播放</button>
+        <button onclick="mute(true)">音频-静音</button>
+        <button onclick="mute(false)">音频-取消静音</button>
+      </div>
+      <div class="input-container">
+        <label for="openurl">打开网页:</label>
+        <input type="text" name="openurl" />
+      </div>
+    </div>
+    <audio id="audio" controls></audio>
+
     <script src="../dist/index.js"></script>
-    <script >
+    <script>
+      const {
+        MsePlayer,
+        Enum: { CMD, PRESS_BUTTON, EEvent },
+      } = WetestMsePlayer;
+      let player = null;
 
-        const { MsePlayer, Enum: { CMD, PRESS_BUTTON, EEvent }} = WetestMsePlayer;
-        const player = new MsePlayer({
-            videoElement: document.getElementById('video'),
-            audioElement: document.getElementById('audio'),
-            wsAddress: 'wss://api.cloudtest.qq.com/v1/websocket/video',
-            deviceId: 13738,
-            testId: "0",
-            adminKey: "13738-1726118927-59c96550-b684-4b36-be67-6e76ed2c3bc7",
-            disableAutoRotate: true
+      function startPlay() {
+        player && player.reset();
+        player = new MsePlayer({
+          videoElement: document.getElementById("video"),
+          audioElement: document.getElementById("audio"),
+          wsAddress: "wss://api.cloudtest.qq.com/v1/websocket/video",
+          deviceId: Number(document.getElementById('deviceID').value),
+          controlKey: document.getElementById('controlKey').value,
+          testId: document.getElementById('testId').value,
+          adminKey: document.getElementById('adminKey').value,
+          disableAutoRotate: true,
         });
+
         player.event.on(EEvent.Rotate, (value) => {
-            console.log('on rotate', value);
+          console.log("on rotate", value);
         });
+        player.event.on(EEvent.ScreenShot, (value) => {
+          console.log("on screenshot", value);
+        });
+        player.event.on(EEvent.DelayData, (value) => {
+          console.log("on delay data", value);
+        });
+      }
+      function sendCommond(btype) {
+        player.sendCommand({
+          cmd: CMD.PressButton,
+          btype,
+        });
+      }
 
-        function sendCommond(btype) {
-            player.sendCommand({
-                cmd: CMD.PressButton,
-                btype,
-            });
-        }
+      function rotate() {
+        player.rotate();
+      }
 
-        function rotate() {
-            player.rotate();
-        }
-        function playAudio() {
-            player.audio.play();
-        }
-        function mute(muted) {
-            player.audio.mute(muted);
-        }
+      function screenshot() {
+        player.sendCommand({
+          cmd: CMD.Capture,
+        });
+      }
+
+      function calDelay() {
+        player.sendCommand({
+          cmd: CMD.CalcDelay,
+          web_req_time: new Date().valueOf(),
+        });
+      }
+
+      function playAudio() {
+        player.audio.play();
+      }
+      function mute(muted) {
+        player.audio.mute(muted);
+      }
     </script>
-</body>
+  </body>
 </html>

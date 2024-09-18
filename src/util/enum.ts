@@ -1,7 +1,9 @@
 
 
 export enum EEvent{
-  Rotate = 'rotate'
+  Rotate = 'rotate',
+  ScreenShot = 'screenshot',
+  DelayData = 'delaydata'
 }
 
 export enum CMD {
@@ -17,6 +19,11 @@ export enum CMD {
   SetClipBoard = "setclipboard", // 设置剪贴板
   GetClipBoard = "getclipboard", // 获取剪贴板内容
   UploadFile = "uploadfile", // 上传文件
+}
+
+export enum ADB {
+  DisableSetting = 'adb shell ct_cmd device_monitor start', // 禁用系统设置
+  OpenUrl = 'adb shell am start -a android.intent.action.VIEW -d', // 打开网页
 }
 
 export enum PRESS_BUTTON {

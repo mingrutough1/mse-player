@@ -102,7 +102,7 @@ export default class MsePlayer {
     }
 
     initAudio() {
-        if(!(this.audioElement instanceof HTMLAudioElement)) return;
+        if (!(this.audioElement instanceof HTMLAudioElement)) return;
         if (isSafari()) {
             console.error("safari 不支持audio");
             return;
@@ -158,7 +158,7 @@ export default class MsePlayer {
     };
 
     rotate = (rotateValue) => {
-        if(typeof rotateValue !== 'number') {
+        if (typeof rotateValue !== 'number') {
             this.rotateValue++;
         } else {
             this.rotateValue = rotateValue;
@@ -169,7 +169,16 @@ export default class MsePlayer {
 
     }
 
-    
+    reset() { // 做一系列事件绑定清除
+        this.socketHeartBeat && clearInterval(this.socketHeartBeat);
+        this.video.clean();
+        this.touchpad.pause();
+        this.keyboard.pause();
+        console.log('emitter.eventNames()', eventEmiter.eventNames());
+        eventEmiter.removeAllListeners();
+
+    }
+
     onSocketOpen() {
         console.log("websocket open");
         // 心跳逻辑
@@ -188,7 +197,6 @@ export default class MsePlayer {
         const messageData = new Uint8Array(event.data);
         switch (messageData[0]) {
             case MSG.H264:
-                // todo 判断流宽高是否变化，是则重新reset Muxer
                 this.video.muxer.feed({
                     video: messageData,
                 });
@@ -202,12 +210,34 @@ export default class MsePlayer {
                 break;
 
             case MSG.Rotate:
-                if(this.disableAutoRotate) break; // 安卓14及 以上不做自动旋转
+                if (this.disableAutoRotate) break; // 安卓14及 以上不做自动旋转
                 console.log('rotate', messageData[4]);
                 this.rotate(messageData[4]);
                 break;
+
+            case MSG.Screenshot:
+                console.log('screenshot');
+                const dataView = new DataView(messageData.buffer, 1, 8);
+                const jpgTimeStr = dataView.getUint32(0) * 1000;
+                const jpgLen = dataView.getUint32(4);
+                const blobData = new Blob([new Uint8Array(messageData.buffer, 9, jpgLen)], { type: 'image/jpeg' });
+                const jpgUrl = URL.createObjectURL(blobData);
+                eventEmiter.emit(EEvent.ScreenShot, {
+                    url: jpgUrl,
+                    time: new Date(jpgTimeStr)
+                });
+                break;
+
+            case MSG.DelayData: 
+                console.log('delay data');
+                let dataString = '';
+                for (var i = 1; i < messageData.length; i++) {
+                    dataString += String.fromCharCode(messageData[i]);
+                }
+                eventEmiter.emit(EEvent.DelayData, dataString);
+                break;
             default:
-                // console.warn("useless message data");
+            // console.warn("useless message data");
         }
     }
     onSocketError(e) {

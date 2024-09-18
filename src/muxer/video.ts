@@ -16,12 +16,10 @@ export class VideoMuxer {
     }
 
     addListener() {
-        window.addEventListener('resize', () => {
-            this.setVideoElementBound();
-        });
+        window.addEventListener('resize', this.setVideoElementBound);
     }
 
-    setVideoElementBound() {
+    setVideoElementBound = () => {
 
         const parentWidth = this.node.parentElement.offsetWidth;
         const parentHeight = this.node.parentElement.offsetHeight;
@@ -33,6 +31,9 @@ export class VideoMuxer {
             this.node.style.maxWidth = `${parentHeight}px`;
             this.node.style.maxHeight = `${parentWidth}px`;
         }
+    }
+    clean() {
+        window.removeEventListener('resize', this.setVideoElementBound);
     }
     reset = () => {
         this.muxer.reset();
