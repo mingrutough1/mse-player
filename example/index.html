@@ -82,8 +82,10 @@
         <button onclick="mute(false)">音频-取消静音</button>
       </div>
       <div class="input-container">
-        <label for="openurl">打开网页:</label>
-        <input type="text" name="openurl" />
+        <label for="openurl">
+          <button onclick="openUrl()">打开网页</button>
+        </label>
+        <input type="text" name="openurl" id="openUrl" />
       </div>
     </div>
     <audio id="audio" controls></audio>
@@ -92,7 +94,7 @@
     <script>
       const {
         MsePlayer,
-        Enum: { CMD, PRESS_BUTTON, EEvent },
+        Enum: { CMD, PRESS_BUTTON, EEvent, ADB },
       } = WetestMsePlayer;
       let player = null;
 
@@ -102,10 +104,10 @@
           videoElement: document.getElementById("video"),
           audioElement: document.getElementById("audio"),
           wsAddress: "wss://api.cloudtest.qq.com/v1/websocket/video",
-          deviceId: Number(document.getElementById('deviceID').value),
-          controlKey: document.getElementById('controlKey').value,
-          testId: document.getElementById('testId').value,
-          adminKey: document.getElementById('adminKey').value,
+          deviceId: Number(document.getElementById("deviceID").value),
+          controlKey: document.getElementById("controlKey").value,
+          testId: document.getElementById("testId").value,
+          adminKey: document.getElementById("adminKey").value,
           disableAutoRotate: true,
         });
 
@@ -118,6 +120,8 @@
         player.event.on(EEvent.DelayData, (value) => {
           console.log("on delay data", value);
         });
+
+        savaDataLocal();
       }
       function sendCommond(btype) {
         player.sendCommand({
@@ -135,6 +139,12 @@
           cmd: CMD.Capture,
         });
       }
+      function openUrl() {
+        player.sendCommand({
+          cmd: CMD.BridgeCMD,
+          content: ADB.OpenUrl + document.getElementById('openUrl').value,
+        });
+      }
 
       function calDelay() {
         player.sendCommand({
@@ -148,6 +158,30 @@
       }
       function mute(muted) {
         player.audio.mute(muted);
+      }
+      (function getLocalData() {
+        const deviceId = localStorage.getItem('deviceId');
+        const controlKey = localStorage.getItem('controlKey');
+        const testId = localStorage.getItem('testId');
+        const adminKey = localStorage.getItem('adminKey');
+
+        document.getElementById("deviceID").value = deviceId;
+        document.getElementById("controlKey").value = controlKey;
+        document.getElementById("testId").value = testId;
+        document.getElementById("adminKey").value = adminKey;
+
+      })();
+
+      function savaDataLocal() {
+        const deviceId = document.getElementById("deviceID").value;
+        const controlKey = document.getElementById("controlKey").value;
+        const testId = document.getElementById("testId").value;
+        const adminKey = document.getElementById("adminKey").value;
+
+        localStorage.setItem("deviceId", deviceId);
+        localStorage.setItem("controlKey", controlKey);
+        localStorage.setItem("testId", testId);
+        localStorage.setItem("adminKey", adminKey);
       }
     </script>
   </body>

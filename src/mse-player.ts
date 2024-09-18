@@ -119,10 +119,10 @@ export default class MsePlayer {
             await Promise.all(this.muxerQuene);
             this.socket = new WebSocket(this.wsAddress);
             this.socket.binaryType = "arraybuffer";
-            this.socket.addEventListener("open", this.onSocketOpen.bind(this));
-            this.socket.addEventListener("message", this.onSocketMessage.bind(this));
-            this.socket.addEventListener("error", this.onSocketError.bind(this));
-            this.socket.addEventListener("close", this.onSocketClose.bind(this));
+            this.socket.addEventListener("open", this.onSocketOpen);
+            this.socket.addEventListener("message", this.onSocketMessage);
+            this.socket.addEventListener("error", this.onSocketError);
+            this.socket.addEventListener("close", this.onSocketClose);
         } catch (error) {
             console.error("muxer 初始化失败");
         }
@@ -174,12 +174,16 @@ export default class MsePlayer {
         this.video.clean();
         this.touchpad.pause();
         this.keyboard.pause();
-        console.log('emitter.eventNames()', eventEmiter.eventNames());
+        this.socket.removeEventListener("open", this.onSocketOpen);
+        this.socket.removeEventListener("message", this.onSocketMessage);
+        this.socket.removeEventListener("error", this.onSocketError);
+        this.socket.removeEventListener("close", this.onSocketClose);
         eventEmiter.removeAllListeners();
+
 
     }
 
-    onSocketOpen() {
+    onSocketOpen = () => {
         console.log("websocket open");
         // 心跳逻辑
         this.socketHeartBeat = setInterval(() => {
@@ -193,7 +197,7 @@ export default class MsePlayer {
             cmd: CMD.StartStream,
         });
     }
-    onSocketMessage(event: MessageEvent) {
+    onSocketMessage = (event: MessageEvent) => {
         const messageData = new Uint8Array(event.data);
         switch (messageData[0]) {
             case MSG.H264:
@@ -240,11 +244,11 @@ export default class MsePlayer {
             // console.warn("useless message data");
         }
     }
-    onSocketError(e) {
+    onSocketError = (e) => {
         console.error("websocket error", e);
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
     }
-    onSocketClose(e) {
+    onSocketClose = (e) => {
         console.error("websocket close", e);
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
     }
