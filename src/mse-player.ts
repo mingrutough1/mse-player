@@ -179,8 +179,6 @@ export default class MsePlayer {
         this.socket.removeEventListener("error", this.onSocketError);
         this.socket.removeEventListener("close", this.onSocketClose);
         eventEmiter.removeAllListeners();
-
-
     }
 
     onSocketOpen = () => {
@@ -232,13 +230,20 @@ export default class MsePlayer {
                 });
                 break;
 
-            case MSG.DelayData: 
+            case MSG.DelayData:
                 console.log('delay data');
                 let dataString = '';
                 for (var i = 1; i < messageData.length; i++) {
                     dataString += String.fromCharCode(messageData[i]);
                 }
                 eventEmiter.emit(EEvent.DelayData, dataString);
+                break;
+
+            case MSG.Clipboard:
+                console.log('get clipboard');
+                const data = messageData.slice(1);
+                const text = new TextDecoder('utf-8').decode(new Uint8Array(data));
+                eventEmiter.emit(EEvent.Clipboard, text);
                 break;
             default:
             // console.warn("useless message data");

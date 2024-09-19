@@ -3,7 +3,8 @@
 export enum EEvent{
   Rotate = 'rotate',
   ScreenShot = 'screenshot',
-  DelayData = 'delaydata'
+  DelayData = 'delaydata',
+  Clipboard = 'clipboard'
 }
 
 export enum CMD {

@@ -5,6 +5,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mse-relatime-player</title>
     <style>
+      body {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+      }
       .container {
         display: flex;
       }
@@ -37,14 +43,22 @@
         height: 80vh;
         margin-left: 20px;
       }
+      .input-container input {
+        margin-top: 10px;
+      }
       .key-params {
-        margin-bottom: 10px;
-        width: fit-content;
+        padding: 10px;
+        width: 100%;
+        display: flex;
+        justify-content: center;
+
+      }
+      .key-params input {
+        margin-right: 10px;
       }
       .video-container,
       .operate-container,
-      .input-container,
-      .key-params {
+      .input-container {
         padding: 10px;
         background: #f0f0f0;
       }
@@ -86,6 +100,16 @@
           <button onclick="openUrl()">打开网页</button>
         </label>
         <input type="text" name="openurl" id="openUrl" />
+        <br>
+        <label for="sendTextToPhone">
+          <button onclick="sendTextToPhone()">发送文本至手机</button>
+        </label>
+        <input type="text" name="sendTextToPhone" id="sendTextToPhone" />
+        <br>
+        <label for="getPhoneClipboard">
+          <button onclick="getPhoneClipboard()">获取手机剪切板内容</button>
+        </label>
+        <input type="text" name="getPhoneClipboard" id="getPhoneClipboard" />
       </div>
     </div>
     <audio id="audio" controls></audio>
@@ -120,6 +144,10 @@
         player.event.on(EEvent.DelayData, (value) => {
           console.log("on delay data", value);
         });
+        player.event.on(EEvent.Clipboard, (value) => {
+          console.log("on clipboard", value);
+          document.getElementById('getPhoneClipboard').value = value
+        });
 
         savaDataLocal();
       }
@@ -143,6 +171,19 @@
         player.sendCommand({
           cmd: CMD.BridgeCMD,
           content: ADB.OpenUrl + document.getElementById('openUrl').value,
+        });
+      }
+
+      function sendTextToPhone() {
+        player.sendCommand({
+          cmd: CMD.SetClipBoard,
+          content: document.getElementById('sendTextToPhone').value
+        });
+      }
+
+      function getPhoneClipboard() {
+        player.sendCommand({
+          cmd: CMD.GetClipBoard,
         });
       }
 
