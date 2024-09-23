@@ -245,6 +245,13 @@ export default class MsePlayer {
                 const text = new TextDecoder('utf-8').decode(new Uint8Array(data));
                 eventEmiter.emit(EEvent.Clipboard, text);
                 break;
+            case MSG.FileUploadVal: 
+                console.log('get fileUpload Val');
+                const data1 = messageData.slice(1);
+                const text1 = new TextDecoder('utf-8').decode(new Uint8Array(data1));
+                eventEmiter.emit(EEvent.FileUploadVal, text1);
+                break;
+
             default:
             // console.warn("useless message data");
         }

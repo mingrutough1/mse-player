@@ -51,7 +51,6 @@
         width: 100%;
         display: flex;
         justify-content: center;
-
       }
       .key-params input {
         margin-right: 10px;
@@ -78,7 +77,7 @@
       <label for="adminKey">adminKey:</label>
       <input type="text" name="adminKey" id="adminKey" />
 
-      <button onclick="startPlay()">开始投屏</button>
+      <button onclick="startPlay()">开启视频流</button>
     </div>
     <div class="container">
       <div class="video-container">
@@ -100,16 +99,25 @@
           <button onclick="openUrl()">打开网页</button>
         </label>
         <input type="text" name="openurl" id="openUrl" />
-        <br>
+        <br />
         <label for="sendTextToPhone">
           <button onclick="sendTextToPhone()">发送文本至手机</button>
         </label>
         <input type="text" name="sendTextToPhone" id="sendTextToPhone" />
-        <br>
+        <br />
         <label for="getPhoneClipboard">
           <button onclick="getPhoneClipboard()">获取手机剪切板内容</button>
         </label>
         <input type="text" name="getPhoneClipboard" id="getPhoneClipboard" />
+        <br />
+        <label for="avatar">上传图片：</label>
+
+        <input
+          type="file"
+          id="avatar"
+          name="avatar"
+          accept="image/png, image/jpeg"
+        />
       </div>
     </div>
     <audio id="audio" controls></audio>
@@ -146,9 +154,11 @@
         });
         player.event.on(EEvent.Clipboard, (value) => {
           console.log("on clipboard", value);
-          document.getElementById('getPhoneClipboard').value = value
+          document.getElementById("getPhoneClipboard").value = value;
         });
-
+        player.event.on(EEvent.FileUploadVal, (value) => {
+          console.log("on file upload", value);
+        });
         savaDataLocal();
       }
       function sendCommond(btype) {
@@ -170,14 +180,14 @@
       function openUrl() {
         player.sendCommand({
           cmd: CMD.BridgeCMD,
-          content: ADB.OpenUrl + document.getElementById('openUrl').value,
+          content: ADB.OpenUrl + document.getElementById("openUrl").value,
         });
       }
 
       function sendTextToPhone() {
         player.sendCommand({
           cmd: CMD.SetClipBoard,
-          content: document.getElementById('sendTextToPhone').value
+          content: document.getElementById("sendTextToPhone").value,
         });
       }
 
@@ -200,17 +210,35 @@
       function mute(muted) {
         player.audio.mute(muted);
       }
+
+      const uploadEle = document.getElementById("avatar");
+      uploadEle.addEventListener("change", (e) => {
+        console.log(uploadEle.files);
+        const file = uploadEle.files[0];
+        const fileReader = new FileReader();
+        fileReader.readAsDataURL(file);
+        fileReader.onload = () => {
+          console.log("file reader-->", fileReader.result);
+          player.sendCommand({
+            cmd: CMD.UploadFile,
+            // 需去除 data:image/png;base64 前缀
+            image_base64: fileReader.result.replace(/data\:image\/png\;base64\,/, ''),
+            file_name: file.name,
+            save_path: "/sdcard/DCIM"
+          });
+        };
+      });
+
       (function getLocalData() {
-        const deviceId = localStorage.getItem('deviceId');
-        const controlKey = localStorage.getItem('controlKey');
-        const testId = localStorage.getItem('testId');
-        const adminKey = localStorage.getItem('adminKey');
+        const deviceId = localStorage.getItem("deviceId");
+        const controlKey = localStorage.getItem("controlKey");
+        const testId = localStorage.getItem("testId");
+        const adminKey = localStorage.getItem("adminKey");
 
         document.getElementById("deviceID").value = deviceId;
         document.getElementById("controlKey").value = controlKey;
         document.getElementById("testId").value = testId;
         document.getElementById("adminKey").value = adminKey;
-
       })();
 
       function savaDataLocal() {

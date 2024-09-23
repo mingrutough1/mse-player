@@ -4,7 +4,9 @@ export enum EEvent{
   Rotate = 'rotate',
   ScreenShot = 'screenshot',
   DelayData = 'delaydata',
-  Clipboard = 'clipboard'
+  Clipboard = 'clipboard',
+  FileUploadVal = 'fileuploadval'
+
 }
 
 export enum CMD {
@@ -19,7 +21,7 @@ export enum CMD {
   BridgeCMD = "bridgecmd", // 发送adb命令给手机，当前仅支持安卓
   SetClipBoard = "setclipboard", // 设置剪贴板
   GetClipBoard = "getclipboard", // 获取剪贴板内容
-  UploadFile = "uploadfile", // 上传文件
+  UploadFile = "uploadfile", // 上传图片
 }
 
 export enum ADB {
