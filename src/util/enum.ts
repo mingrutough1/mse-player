@@ -1,6 +1,10 @@
 
 
 export enum EEvent{
+  SocketOpen = 'socketopen',
+  SocketMessage = 'socketmessage',
+  SocketError = 'socketerror',
+  SocketClose = 'socketclose',
   Rotate = 'rotate',
   ScreenShot = 'screenshot',
   DelayData = 'delaydata',

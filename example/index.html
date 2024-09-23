@@ -150,32 +150,49 @@
           controlKey: document.getElementById("controlKey").value,
           testId: document.getElementById("testId").value,
           adminKey: document.getElementById("adminKey").value,
-          disableAutoRotate: true,
+          // disableAutoRotate: true,
         });
+        addListener();
+        savaDataLocal();
+      }
 
-        player.event.on(EEvent.Rotate, (value) => {
-          console.log("on rotate", value);
+      function addListener() {
+        player.event.on(EEvent.Rotate, (e) => {
+          console.log("on rotate", e);
         });
-        player.event.on(EEvent.ScreenShot, (value) => {
-          console.log("on screenshot", value);
+        player.event.on(EEvent.ScreenShot, (e) => {
+          console.log("on screenshot", e);
         });
-        player.event.on(EEvent.DelayData, (value) => {
-          console.log("on delay data", value);
+        player.event.on(EEvent.DelayData, (e) => {
+          console.log("on delay data", e);
         });
-        player.event.on(EEvent.Clipboard, (value) => {
-          console.log("on clipboard", value);
-          document.getElementById("getPhoneClipboard").value = value;
+        player.event.on(EEvent.Clipboard, (e) => {
+          console.log("on clipboard", e);
+          document.getElementById("getPhoneClipboard").e = e;
         });
-        player.event.on(EEvent.FileUploadVal, (value) => {
-          console.log("on file upload", value);
+        player.event.on(EEvent.FileUploadVal, (e) => {
+          console.log("on file upload", e);
         });
-        player.event.on(EEvent.BridgeCMD, (value) => {
-          console.log("on bridge cmd", value);
-          if(value.cmd_req_id === 'foldableScreenState') {
-            document.getElementById("foldscreenstatus").innerText = value.result;
+        player.event.on(EEvent.BridgeCMD, (e) => {
+          console.log("on bridge cmd", e);
+          if (e.cmd_req_id === "foldableScreenState") {
+            document.getElementById("foldscreenstatus").innerText =
+              e.result;
           }
         });
-        savaDataLocal();
+
+        player.event.on(EEvent.SocketOpen, (e) => {
+          console.log('on socket open', e);
+        })
+        // player.event.on(EEvent.SocketMessage, (e) => {
+        //   console.log('on socket msg', e);
+        // })
+        player.event.on(EEvent.SocketError, (e) => {
+          console.log('on socket error', e);
+        })
+        player.event.on(EEvent.SocketClose, (e) => {
+          console.log('on socket close', e);
+        })
       }
       function sendCommond(btype) {
         player.sendCommand({

@@ -181,8 +181,9 @@ export default class MsePlayer {
         eventEmiter.removeAllListeners();
     }
 
-    onSocketOpen = () => {
+    onSocketOpen = (event: MessageEvent) => {
         console.log("websocket open");
+        eventEmiter.emit(EEvent.SocketOpen, event);
         // 心跳逻辑
         this.socketHeartBeat = setInterval(() => {
             this.sendCommand({
@@ -196,6 +197,7 @@ export default class MsePlayer {
         });
     }
     onSocketMessage = (event: MessageEvent) => {
+        eventEmiter.emit(EEvent.SocketMessage, event);
         const messageData = new Uint8Array(event.data);
         switch (messageData[0]) {
             case MSG.H264:
@@ -253,24 +255,25 @@ export default class MsePlayer {
                 break;
             case MSG.ImageStream:
                 if (messageData[1] === 0) { // 图片流
-                    console.log('get image stream');
                 } else { // bridge cmd responese
                     console.log('get cmd response');
                     let data2 = messageData.slice(1);
                     const text2 = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(data2)));
                     eventEmiter.emit(EEvent.BridgeCMD, text2);
                 }
-
+                break;
             default:
             console.warn("useless message data");
         }
     }
     onSocketError = (e) => {
         console.error("websocket error", e);
+        eventEmiter.emit(EEvent.SocketError, e);
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
     }
     onSocketClose = (e) => {
         console.error("websocket close", e);
+        eventEmiter.emit(EEvent.SocketClose, e);
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
     }
 }
