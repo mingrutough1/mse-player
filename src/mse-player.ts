@@ -245,15 +245,24 @@ export default class MsePlayer {
                 const text = new TextDecoder('utf-8').decode(new Uint8Array(data));
                 eventEmiter.emit(EEvent.Clipboard, text);
                 break;
-            case MSG.FileUploadVal: 
+            case MSG.FileUploadVal:
                 console.log('get fileUpload Val');
                 const data1 = messageData.slice(1);
                 const text1 = new TextDecoder('utf-8').decode(new Uint8Array(data1));
                 eventEmiter.emit(EEvent.FileUploadVal, text1);
                 break;
+            case MSG.ImageStream:
+                if (messageData[1] === 0) { // 图片流
+                    console.log('get image stream');
+                } else { // bridge cmd responese
+                    console.log('get cmd response');
+                    let data2 = messageData.slice(1);
+                    const text2 = JSON.parse(new TextDecoder('utf-8').decode(new Uint8Array(data2)));
+                    eventEmiter.emit(EEvent.BridgeCMD, text2);
+                }
 
             default:
-            // console.warn("useless message data");
+            console.warn("useless message data");
         }
     }
     onSocketError = (e) => {

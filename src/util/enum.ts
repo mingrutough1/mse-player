@@ -5,8 +5,8 @@ export enum EEvent{
   ScreenShot = 'screenshot',
   DelayData = 'delaydata',
   Clipboard = 'clipboard',
-  FileUploadVal = 'fileuploadval'
-
+  FileUploadVal = 'fileuploadval',
+  BridgeCMD = 'bridgecmd'
 }
 
 export enum CMD {
@@ -27,6 +27,9 @@ export enum CMD {
 export enum ADB {
   DisableSetting = 'adb shell ct_cmd device_monitor start', // 禁用系统设置
   OpenUrl = 'adb shell am start -a android.intent.action.VIEW -d', // 打开网页
+  GetFoldState = 'adb shell ct_cmd device_state print-state', // 查询折叠屏状态，注意：需传cmd_req_id 为：foldableScreenState
+  FoldScreen = 'adb shell ct_cmd device_state state fold', // 折叠
+  UnFoldScreen = 'adb shell ct_cmd device_state state unfold'// 展开
 }
 
 export enum PRESS_BUTTON {

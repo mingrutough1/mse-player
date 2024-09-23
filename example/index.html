@@ -43,7 +43,8 @@
         height: 80vh;
         margin-left: 20px;
       }
-      .input-container input {
+      .input-container input,
+      .input-container button {
         margin-top: 10px;
       }
       .key-params {
@@ -51,6 +52,7 @@
         width: 100%;
         display: flex;
         justify-content: center;
+        align-items: center;
       }
       .key-params input {
         margin-right: 10px;
@@ -118,6 +120,14 @@
           name="avatar"
           accept="image/png, image/jpeg"
         />
+
+        <br />
+        <button onclick="handleFoldScreen(0)">折叠屏-查状态</button>
+        <span id="foldscreenstatus"></span>
+        <br />
+        <button onclick="handleFoldScreen(1)">折叠屏-展开</button>
+        <br />
+        <button onclick="handleFoldScreen(2)">折叠屏-折叠</button>
       </div>
     </div>
     <audio id="audio" controls></audio>
@@ -158,6 +168,12 @@
         });
         player.event.on(EEvent.FileUploadVal, (value) => {
           console.log("on file upload", value);
+        });
+        player.event.on(EEvent.BridgeCMD, (value) => {
+          console.log("on bridge cmd", value);
+          if(value.cmd_req_id === 'foldableScreenState') {
+            document.getElementById("foldscreenstatus").innerText = value.result;
+          }
         });
         savaDataLocal();
       }
@@ -211,6 +227,32 @@
         player.audio.mute(muted);
       }
 
+      function handleFoldScreen(type) {
+        switch (type) {
+          case 0:
+            player.sendCommand({
+              cmd: CMD.BridgeCMD,
+              content: ADB.GetFoldState,
+              cmd_req_id: "foldableScreenState",
+            });
+            break;
+          case 1:
+            player.sendCommand({
+              cmd: CMD.BridgeCMD,
+              content: ADB.UnFoldScreen,
+            });
+            break;
+          case 2:
+            player.sendCommand({
+              cmd: CMD.BridgeCMD,
+              content: ADB.FoldScreen,
+            });
+            break;
+          default:
+            console.log("no match");
+        }
+      }
+
       const uploadEle = document.getElementById("avatar");
       uploadEle.addEventListener("change", (e) => {
         console.log(uploadEle.files);
@@ -222,9 +264,12 @@
           player.sendCommand({
             cmd: CMD.UploadFile,
             // 需去除 data:image/png;base64 前缀
-            image_base64: fileReader.result.replace(/data\:image\/png\;base64\,/, ''),
+            image_base64: fileReader.result.replace(
+              /data\:image\/png\;base64\,/,
+              ""
+            ),
             file_name: file.name,
-            save_path: "/sdcard/DCIM"
+            save_path: "/sdcard/DCIM",
           });
         };
       });
