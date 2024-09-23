@@ -172,8 +172,8 @@ export default class MsePlayer {
     reset() { // 做一系列事件绑定清除
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
         this.video.clean();
-        this.touchpad.pause();
-        this.keyboard.pause();
+        this.touchpad.clean();
+        this.keyboard.clean();
         this.socket.removeEventListener("open", this.onSocketOpen);
         this.socket.removeEventListener("message", this.onSocketMessage);
         this.socket.removeEventListener("error", this.onSocketError);

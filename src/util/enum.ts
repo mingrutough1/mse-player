@@ -1,6 +1,7 @@
 
 
 export enum EEvent{
+  VideoReady = 'videoready',
   SocketOpen = 'socketopen',
   SocketMessage = 'socketmessage',
   SocketError = 'socketerror',
@@ -48,7 +49,6 @@ export enum TOUCH {
   Move = 3, //touch move
 }
 
-
 export enum MSG {
   H264, // h264
   Rotate, // 旋转
@@ -60,6 +60,7 @@ export enum MSG {
   CMDResponse, // cmd 返回值
   AAC = 255, // 音频
 }
+
 export enum ROTATE_MSG {
     '0degrees',
     '-90degrees',

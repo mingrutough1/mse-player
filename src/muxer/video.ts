@@ -1,7 +1,9 @@
 import JMuxer from 'jmuxer';
 
 import { IVideoMuxer, MediaElementType } from '../util/type'
-import { ROTATE_MSG, CMD } from '../util/enum';
+import { ROTATE_MSG, CMD, EEvent } from '../util/enum';
+import eventEmiter from '../util/event-bus';
+
 export class VideoMuxer {
     node: MediaElementType;
     muxer: JMuxer;
@@ -17,6 +19,7 @@ export class VideoMuxer {
 
     addListener() {
         window.addEventListener('resize', this.setVideoElementBound);
+        this.node.addEventListener('loadeddata', this.handleVideoEvent);
     }
 
     setVideoElementBound = () => {
@@ -32,8 +35,13 @@ export class VideoMuxer {
             this.node.style.maxHeight = `${parentWidth}px`;
         }
     }
+
+    handleVideoEvent = (e) => {
+        eventEmiter.emit(EEvent.VideoReady, e);
+    }
     clean() {
         window.removeEventListener('resize', this.setVideoElementBound);
+        this.node.removeEventListener('loadeddata', this.handleVideoEvent);
     }
     reset = () => {
         this.muxer.reset();

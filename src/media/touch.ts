@@ -90,7 +90,7 @@ export default class Touch {
         this.addListener();
     }
 
-    pause() {
+    clean() {
         this.node.removeEventListener("mousedown", this.handleMousedown);
         document.removeEventListener("mousemove", this.handleMouseover);
         document.removeEventListener("mouseup", this.handleMouseup);

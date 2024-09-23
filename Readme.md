@@ -14,4 +14,4 @@ sdk 能力：
 - [x] 打开网页
 - [x] 设置、获取剪切板
 - [x] 折叠屏展开、收起
-- [ ] 重要事件暴露，如video play、pause、end、error 等等
+- [x] 重要事件暴露，如video ready , socket 相关事件等

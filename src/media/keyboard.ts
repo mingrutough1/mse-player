@@ -43,7 +43,7 @@ export default class KeyBoard {
     this.addListener();
   }
 
-  pause() {
+  clean() {
     window.removeEventListener("keydown", this.handleKeydown);
     window.removeEventListener("keypress", this.handleKeypress);
     this.hasBind = false;

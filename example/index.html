@@ -63,6 +63,11 @@
         padding: 10px;
         background: #f0f0f0;
       }
+
+      #videoLoading{
+        position: absolute;
+        display: none;
+      }
     </style>
   </head>
   <body>
@@ -84,6 +89,7 @@
     <div class="container">
       <div class="video-container">
         <video autoplay muted id="video"></video>
+        <span id="videoLoading">视频加载中......</span>
       </div>
       <div class="operate-container">
         <button onclick="sendCommond(0)">HOME</button>
@@ -152,11 +158,20 @@
           adminKey: document.getElementById("adminKey").value,
           // disableAutoRotate: true,
         });
+
+        document.getElementById('videoLoading').style.display = 'block'; // 简易loading
         addListener();
         savaDataLocal();
       }
 
       function addListener() {
+
+        player.event.on(EEvent.VideoReady, (e) => {
+          console.log("on video ready", e);
+          document.getElementById('videoLoading').style.display = 'none'; // loading 结束
+        });
+
+
         player.event.on(EEvent.Rotate, (e) => {
           console.log("on rotate", e);
         });
