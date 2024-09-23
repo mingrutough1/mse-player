@@ -3,6 +3,7 @@ import JMuxer from 'jmuxer';
 import { IVideoMuxer, MediaElementType } from '../util/type'
 import { ROTATE_MSG, CMD, EEvent } from '../util/enum';
 import eventEmiter from '../util/event-bus';
+import { cursorImg } from '../util/const';
 
 export class VideoMuxer {
     node: MediaElementType;
@@ -15,6 +16,7 @@ export class VideoMuxer {
         this.rotateValue = rotateValue;
         this.sendCommand = sendCommand;
         this.addListener();
+        this.node.style.cursor = `url(${cursorImg}), auto`;
     }
 
     addListener() {
