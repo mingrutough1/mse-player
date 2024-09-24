@@ -160,6 +160,7 @@
         });
 
         document.getElementById('videoLoading').style.display = 'block'; // 简易loading
+        document.getElementById('videoLoading').innerText = '视频加载中......'; // 
         addListener();
         savaDataLocal();
       }
@@ -207,6 +208,8 @@
         })
         player.event.on(EEvent.SocketClose, (e) => {
           console.log('on socket close', e);
+          document.getElementById('videoLoading').style.display = 'block'; // 简易loading
+          document.getElementById('videoLoading').innerText = 'websocket 服务已断开\n请检查参数后重试'; // 
         })
       }
       function sendCommond(btype) {

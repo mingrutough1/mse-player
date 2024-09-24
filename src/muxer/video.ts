@@ -29,7 +29,7 @@ export class VideoMuxer {
         const parentWidth = this.node.parentElement.offsetWidth;
         const parentHeight = this.node.parentElement.offsetHeight;
 
-        if(this.rotateValue % 2 === 0) {
+        if (this.rotateValue % 2 === 0) {
             this.node.style.maxWidth = `${parentWidth}px`;
             this.node.style.maxHeight = `${parentHeight}px`;
         } else {
@@ -47,9 +47,6 @@ export class VideoMuxer {
     }
     reset = () => {
         this.muxer.reset();
-        this.sendCommand({
-            cmd: CMD.StartStream,
-        });
     }
     init() {
         return new Promise((resolve) => {
@@ -64,7 +61,9 @@ export class VideoMuxer {
                 maxDelay: 1000,
                 onReady: isReset => {
                     if (isReset) {
-                        // todo, jmuxer reset 重新send cmd startvideo 获取关键帧
+                        this.sendCommand({
+                            cmd: CMD.StartStream,
+                        });
                     } else {
                         resolve(true)
                     }

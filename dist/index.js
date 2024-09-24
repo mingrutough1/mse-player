@@ -564,9 +564,6 @@
             };
             this.reset = function () {
                 _this.muxer.reset();
-                _this.sendCommand({
-                    cmd: CMD.StartStream,
-                });
             };
             var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand;
             this.node = node;
@@ -596,7 +593,11 @@
                     checkDelay: 5000,
                     maxDelay: 1000,
                     onReady: function (isReset) {
-                        if (isReset) ;
+                        if (isReset) {
+                            _this.sendCommand({
+                                cmd: CMD.StartStream,
+                            });
+                        }
                         else {
                             resolve(true);
                         }
