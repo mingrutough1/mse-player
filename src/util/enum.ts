@@ -7,7 +7,7 @@ export enum EEvent{
   SocketError = 'socketerror',
   SocketClose = 'socketclose',
   Rotate = 'rotate',
-  ScreenShot = 'screenshot',
+  Capture = 'capture',
   DelayData = 'delaydata',
   Clipboard = 'clipboard',
   FileUploadVal = 'fileuploadval',
@@ -26,7 +26,7 @@ export enum CMD {
   BridgeCMD = "bridgecmd", // 发送adb命令给手机，当前仅支持安卓
   SetClipBoard = "setclipboard", // 设置剪贴板
   GetClipBoard = "getclipboard", // 获取剪贴板内容
-  UploadFile = "uploadfile", // 上传图片
+  UploadFile = "uploadfile", // 上传图片， 注意：文件大小需小于1MB
 }
 
 export enum ADB {

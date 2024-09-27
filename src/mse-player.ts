@@ -220,13 +220,13 @@ export default class MsePlayer {
                 break;
 
             case MSG.Screenshot:
-                console.log('screenshot');
+                console.log('capture');
                 const dataView = new DataView(messageData.buffer, 1, 8);
                 const jpgTimeStr = dataView.getUint32(0) * 1000;
                 const jpgLen = dataView.getUint32(4);
                 const blobData = new Blob([new Uint8Array(messageData.buffer, 9, jpgLen)], { type: 'image/jpeg' });
                 const jpgUrl = URL.createObjectURL(blobData);
-                eventEmiter.emit(EEvent.ScreenShot, {
+                eventEmiter.emit(EEvent.Capture, {
                     url: jpgUrl,
                     time: new Date(jpgTimeStr)
                 });

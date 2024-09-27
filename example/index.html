@@ -96,7 +96,7 @@
         <button onclick="sendCommond(1)">MENU</button>
         <button onclick="sendCommond(2)">BACK</button>
         <button onclick="rotate()">旋转</button>
-        <button onclick="screenshot()">截图</button>
+        <button onclick="capture()">截图</button>
         <button onclick="calDelay()">计算延时</button>
         <button onclick="playAudio()">音频-播放</button>
         <button onclick="mute(true)">音频-静音</button>
@@ -176,8 +176,8 @@
         player.event.on(EEvent.Rotate, (e) => {
           console.log("on rotate", e);
         });
-        player.event.on(EEvent.ScreenShot, (e) => {
-          console.log("on screenshot", e);
+        player.event.on(EEvent.Capture, (e) => {
+          console.log("on capture", e);
         });
         player.event.on(EEvent.DelayData, (e) => {
           console.log("on delay data", e);
@@ -223,7 +223,7 @@
         player.rotate();
       }
 
-      function screenshot() {
+      function capture() {
         player.sendCommand({
           cmd: CMD.Capture,
         });

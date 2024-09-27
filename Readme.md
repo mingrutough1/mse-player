@@ -119,7 +119,7 @@ const player = new MsePlayer({
 player.sendCommand({
     cmd: CMD.Capture,
 });
-player.event.on(EEvent.ScreenShot, (data) => {
+player.event.on(EEvent.Capture, (data) => {
     console.log("截图时间", data.time);
     console.log("图片地址", data.url);
 });
@@ -147,7 +147,7 @@ enum EEvent {
   SocketError = "socketerror",
   SocketClose = "socketclose",
   Rotate = "rotate",
-  ScreenShot = "screenshot",
+  Capture = "capture",
   DelayData = "delaydata",
   Clipboard = "clipboard",
   FileUploadVal = "fileuploadval",

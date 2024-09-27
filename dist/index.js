@@ -12,7 +12,7 @@
         EEvent["SocketError"] = "socketerror";
         EEvent["SocketClose"] = "socketclose";
         EEvent["Rotate"] = "rotate";
-        EEvent["ScreenShot"] = "screenshot";
+        EEvent["Capture"] = "capture";
         EEvent["DelayData"] = "delaydata";
         EEvent["Clipboard"] = "clipboard";
         EEvent["FileUploadVal"] = "fileuploadval";
@@ -841,13 +841,13 @@
                         _this.rotate(messageData[4]);
                         break;
                     case MSG.Screenshot:
-                        console.log('screenshot');
+                        console.log('capture');
                         var dataView = new DataView(messageData.buffer, 1, 8);
                         var jpgTimeStr = dataView.getUint32(0) * 1000;
                         var jpgLen = dataView.getUint32(4);
                         var blobData = new Blob([new Uint8Array(messageData.buffer, 9, jpgLen)], { type: 'image/jpeg' });
                         var jpgUrl = URL.createObjectURL(blobData);
-                        eventEmiter.emit(EEvent.ScreenShot, {
+                        eventEmiter.emit(EEvent.Capture, {
                             url: jpgUrl,
                             time: new Date(jpgTimeStr)
                         });
