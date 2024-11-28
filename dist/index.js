@@ -824,9 +824,10 @@
                     cmd: CMD.StartStream,
                 });
                 _this.socketCalcInterval = setInterval(function () {
+                    _this.prevSendDelayRequestTime = Date.now();
                     _this.sendCommand({
                         cmd: CMD.CalcDelay,
-                        web_req_time: Date.now()
+                        web_req_time: _this.prevSendDelayRequestTime,
                     });
                 }, 2000);
             };
@@ -896,6 +897,9 @@
                         // }
                         // web => webvideosvr => videosvr => pc(phone)
                         var msg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(messageData.slice(1))));
+                        if (msg.web_req_time !== _this.prevSendDelayRequestTime) {
+                            return;
+                        }
                         var web_video_to_pc = (msg.webvideo_resp_time - msg.webvideo_req_time) / 2;
                         var video_to_pc = (msg.videosvr_resp_time - msg.videosvr_req_time) / 2;
                         var total = (now - msg.web_req_time) / 2;
@@ -938,11 +942,13 @@
                 console.error("websocket error", e);
                 eventEmiter.emit(EEvent.SocketError, e);
                 _this.socketHeartBeat && clearInterval(_this.socketHeartBeat);
+                _this.socketCalcInterval && clearInterval(_this.socketCalcInterval);
             };
             this.onSocketClose = function (e) {
                 console.error("websocket close", e);
                 eventEmiter.emit(EEvent.SocketClose, e);
                 _this.socketHeartBeat && clearInterval(_this.socketHeartBeat);
+                _this.socketCalcInterval && clearInterval(_this.socketCalcInterval);
             };
             this.initOption(options);
             this.initVideo();

@@ -36,6 +36,7 @@ export default class MsePlayer {
     lastCalc = 0;
     frameCount = 0;
     bytesReceived = 0;
+    prevSendDelayRequestTime: number;
 
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
@@ -203,9 +204,10 @@ export default class MsePlayer {
         });
 
         this.socketCalcInterval = setInterval(() => {
+            this.prevSendDelayRequestTime = Date.now();
             this.sendCommand({
                 cmd: CMD.CalcDelay,
-                web_req_time: Date.now()
+                web_req_time: this.prevSendDelayRequestTime,
             });
         }, 2000)
     }
@@ -280,7 +282,10 @@ export default class MsePlayer {
                 //     "webvideo_resp_time": 1732693841496
                 // }
                 // web => webvideosvr => videosvr => pc(phone)
-                const msg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(messageData.slice(1))))
+                const msg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(messageData.slice(1))));
+                if (msg.web_req_time !== this.prevSendDelayRequestTime){
+                    return;
+                }
                 const web_video_to_pc = (msg.webvideo_resp_time - msg.webvideo_req_time) / 2;
                 const video_to_pc = (msg.videosvr_resp_time - msg.videosvr_req_time) / 2;
                 const total = (now - msg.web_req_time) / 2;
@@ -325,10 +330,12 @@ export default class MsePlayer {
         console.error("websocket error", e);
         eventEmiter.emit(EEvent.SocketError, e);
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
+        this.socketCalcInterval && clearInterval(this.socketCalcInterval);
     }
     onSocketClose = (e) => {
         console.error("websocket close", e);
         eventEmiter.emit(EEvent.SocketClose, e);
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
+        this.socketCalcInterval && clearInterval(this.socketCalcInterval);
     }
 }
