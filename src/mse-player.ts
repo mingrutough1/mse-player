@@ -25,12 +25,17 @@ export default class MsePlayer {
     private _rotateValue: ROTATE_MSG = ROTATE_MSG["0degrees"];
     socket: WebSocket;
     socketHeartBeat: number;
+    socketCalcInterval: number;
 
     disableAutoRotate: Boolean = false;
     touchpad: Touchpad;
     keyboard: Keyboard;
 
     event = eventEmiter;
+
+    lastCalc = 0;
+    frameCount = 0;
+    bytesReceived = 0;
 
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
@@ -171,6 +176,7 @@ export default class MsePlayer {
 
     reset() { // 做一系列事件绑定清除
         this.socketHeartBeat && clearInterval(this.socketHeartBeat);
+        this.socketCalcInterval && clearInterval(this.socketCalcInterval);
         this.video.clean();
         this.touchpad.clean();
         this.keyboard.clean();
@@ -195,12 +201,40 @@ export default class MsePlayer {
         this.sendCommand({
             cmd: CMD.StartStream,
         });
+
+        this.socketCalcInterval = setInterval(() => {
+            this.sendCommand({
+                cmd: CMD.CalcDelay,
+                web_req_time: Date.now()
+            });
+        }, 2000)
     }
+
+    calcFpsAndBytes = (messageData) => {
+        const now = Date.now();
+        this.frameCount++;
+        this.bytesReceived += messageData.byteLength;
+
+        if (this.lastCalc === 0){
+            this.lastCalc = now;
+        }else if (now - this.lastCalc > 1000){
+            const result = {
+                fps: Math.ceil((this.frameCount * 1000) / (now - this.lastCalc)),
+                netSpeed: ((this.bytesReceived * 1000) / (1024 * (now - this.lastCalc))).toFixed(2),
+            }
+            eventEmiter.emit(EEvent.VideoInfo, result);
+            this.frameCount = 0;
+            this.bytesReceived = 0;
+            this.lastCalc = now;
+        }
+    }
+
     onSocketMessage = (event: MessageEvent) => {
         eventEmiter.emit(EEvent.SocketMessage, event);
         const messageData = new Uint8Array(event.data);
         switch (messageData[0]) {
             case MSG.H264:
+                this.calcFpsAndBytes(messageData);
                 this.video.muxer.feed({
                     video: messageData,
                 });
@@ -233,12 +267,32 @@ export default class MsePlayer {
                 break;
 
             case MSG.DelayData:
-                console.log('delay data');
-                let dataString = '';
-                for (var i = 1; i < messageData.length; i++) {
-                    dataString += String.fromCharCode(messageData[i]);
-                }
-                eventEmiter.emit(EEvent.DelayData, dataString);
+                let now = Date.now();
+                // if (now - this.lastRefresh < 2000){
+                //     return;
+                // }
+                // {
+                //     "web_req_time": 1732693841357,
+                //     "webvideo_req_time": 1732693841461,
+                //     "videosvr_req_time": 1732693841461,
+                //     "pc_req_time": 1732693841425,
+                //     "videosvr_resp_time": 1732693841495,
+                //     "webvideo_resp_time": 1732693841496
+                // }
+                // web => webvideosvr => videosvr => pc(phone)
+                const msg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(messageData.slice(1))))
+                const web_video_to_pc = (msg.webvideo_resp_time - msg.webvideo_req_time) / 2;
+                const video_to_pc = (msg.videosvr_resp_time - msg.videosvr_req_time) / 2;
+                const total = (now - msg.web_req_time) / 2;
+
+                const web_video_to_video = web_video_to_pc - video_to_pc;
+                const user_to_web_video = total - web_video_to_pc;
+                eventEmiter.emit(EEvent.DelayData, {
+                    total,
+                    user_to_web_video,
+                    web_video_to_video,
+                    video_to_pc
+                });
                 break;
 
             case MSG.Clipboard:
@@ -254,6 +308,7 @@ export default class MsePlayer {
                 eventEmiter.emit(EEvent.FileUploadVal, text1);
                 break;
             case MSG.ImageStream:
+                this.calcFpsAndBytes(messageData);
                 if (messageData[1] === 0) { // 图片流
                 } else { // bridge cmd responese
                     console.log('get cmd response');

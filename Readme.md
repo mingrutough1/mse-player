@@ -152,6 +152,7 @@ enum EEvent {
   Clipboard = "clipboard",
   FileUploadVal = "fileuploadval",
   BridgeCMD = "bridgecmd",
+  VideoInfo = 'videoinfo',
 }
 ```
 
@@ -180,5 +181,15 @@ player.event.on(EEvent.SocketClose, (e) => {
   console.log("on socket close", e);
   document.getElementById("videoLoading").innerText =
     "websocket 服务已断开\n请检查参数后重试"; //
+});
+player.event.on(EEvent.VideoInfo, (e) => {
+  console.log("fps", e.fps);
+  console.log("网络速度(kb/s)", e.netSpeed);
+});
+player.event.on(EEvent.DelayData, (e) => {
+  console.log("总延迟", e.total);
+  console.log("browser到web_video", e.user_to_web_video);
+  console.log("web_video到video", e.web_video_to_video);
+  console.log("video到pc", e.video_to_pc);
 });
 ```

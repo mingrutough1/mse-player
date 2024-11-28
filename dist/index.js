@@ -17,6 +17,7 @@
         EEvent["Clipboard"] = "clipboard";
         EEvent["FileUploadVal"] = "fileuploadval";
         EEvent["BridgeCMD"] = "bridgecmd";
+        EEvent["VideoInfo"] = "videoinfo";
     })(EEvent || (EEvent = {}));
     var CMD;
     (function (CMD) {
@@ -786,6 +787,9 @@
             this._rotateValue = ROTATE_MSG["0degrees"];
             this.disableAutoRotate = false;
             this.event = eventEmiter;
+            this.lastCalc = 0;
+            this.frameCount = 0;
+            this.bytesReceived = 0;
             this.sendCommand = function (data) {
                 console.log(data);
                 _this.socket.send(JSON.stringify(Object.assign(data, {
@@ -819,12 +823,37 @@
                 _this.sendCommand({
                     cmd: CMD.StartStream,
                 });
+                _this.socketCalcInterval = setInterval(function () {
+                    _this.sendCommand({
+                        cmd: CMD.CalcDelay,
+                        web_req_time: Date.now()
+                    });
+                }, 2000);
+            };
+            this.calcFpsAndBytes = function (messageData) {
+                var now = Date.now();
+                _this.frameCount++;
+                _this.bytesReceived += messageData.byteLength;
+                if (_this.lastCalc === 0) {
+                    _this.lastCalc = now;
+                }
+                else if (now - _this.lastCalc > 1000) {
+                    var result = {
+                        fps: Math.ceil((_this.frameCount * 1000) / (now - _this.lastCalc)),
+                        netSpeed: ((_this.bytesReceived * 1000) / (1024 * (now - _this.lastCalc))).toFixed(2),
+                    };
+                    eventEmiter.emit(EEvent.VideoInfo, result);
+                    _this.frameCount = 0;
+                    _this.bytesReceived = 0;
+                    _this.lastCalc = now;
+                }
             };
             this.onSocketMessage = function (event) {
                 eventEmiter.emit(EEvent.SocketMessage, event);
                 var messageData = new Uint8Array(event.data);
                 switch (messageData[0]) {
                     case MSG.H264:
+                        _this.calcFpsAndBytes(messageData);
                         _this.video.muxer.feed({
                             video: messageData,
                         });
@@ -853,12 +882,31 @@
                         });
                         break;
                     case MSG.DelayData:
-                        console.log('delay data');
-                        var dataString = '';
-                        for (var i = 1; i < messageData.length; i++) {
-                            dataString += String.fromCharCode(messageData[i]);
-                        }
-                        eventEmiter.emit(EEvent.DelayData, dataString);
+                        var now = Date.now();
+                        // if (now - this.lastRefresh < 2000){
+                        //     return;
+                        // }
+                        // {
+                        //     "web_req_time": 1732693841357,
+                        //     "webvideo_req_time": 1732693841461,
+                        //     "videosvr_req_time": 1732693841461,
+                        //     "pc_req_time": 1732693841425,
+                        //     "videosvr_resp_time": 1732693841495,
+                        //     "webvideo_resp_time": 1732693841496
+                        // }
+                        // web => webvideosvr => videosvr => pc(phone)
+                        var msg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(messageData.slice(1))));
+                        var web_video_to_pc = (msg.webvideo_resp_time - msg.webvideo_req_time) / 2;
+                        var video_to_pc = (msg.videosvr_resp_time - msg.videosvr_req_time) / 2;
+                        var total = (now - msg.web_req_time) / 2;
+                        var web_video_to_video = web_video_to_pc - video_to_pc;
+                        var user_to_web_video = total - web_video_to_pc;
+                        eventEmiter.emit(EEvent.DelayData, {
+                            total: total,
+                            user_to_web_video: user_to_web_video,
+                            web_video_to_video: web_video_to_video,
+                            video_to_pc: video_to_pc
+                        });
                         break;
                     case MSG.Clipboard:
                         console.log('get clipboard');
@@ -873,6 +921,7 @@
                         eventEmiter.emit(EEvent.FileUploadVal, text1);
                         break;
                     case MSG.ImageStream:
+                        _this.calcFpsAndBytes(messageData);
                         if (messageData[1] === 0) ;
                         else { // bridge cmd responese
                             console.log('get cmd response');
@@ -999,6 +1048,7 @@
         };
         MsePlayer.prototype.reset = function () {
             this.socketHeartBeat && clearInterval(this.socketHeartBeat);
+            this.socketCalcInterval && clearInterval(this.socketCalcInterval);
             this.video.clean();
             this.touchpad.clean();
             this.keyboard.clean();

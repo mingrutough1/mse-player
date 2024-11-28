@@ -11,7 +11,8 @@ export enum EEvent{
   DelayData = 'delaydata',
   Clipboard = 'clipboard',
   FileUploadVal = 'fileuploadval',
-  BridgeCMD = 'bridgecmd'
+  BridgeCMD = 'bridgecmd',
+  VideoInfo = 'videoinfo',
 }
 
 export enum CMD {
@@ -39,7 +40,7 @@ export enum ADB {
 
 export enum PRESS_BUTTON {
     Home, // 主页
-    Menu,// 
+    Menu,//
     Back, // 返回
 }
 
