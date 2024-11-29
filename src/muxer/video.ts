@@ -30,8 +30,8 @@ export class VideoMuxer {
         const parentHeight = this.node.parentElement.offsetHeight;
 
         if (this.rotateValue % 2 === 0) {
-            this.node.style.removeProperty('max-width');
-            this.node.style.removeProperty('max-height');
+            this.node.style.maxWidth = `${parentWidth}px`;
+            this.node.style.maxHeight = `${parentHeight}px`;
         } else {
             this.node.style.maxWidth = `${parentHeight}px`;
             this.node.style.maxHeight = `${parentWidth}px`;
