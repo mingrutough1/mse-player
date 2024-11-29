@@ -61,9 +61,9 @@ export class VideoMuxer {
                 maxDelay: 1000,
                 onReady: isReset => {
                     if (isReset) {
-                        this.sendCommand({
-                            cmd: CMD.StartStream,
-                        });
+                        // this.sendCommand({
+                        //     cmd: CMD.StartStream,
+                        // });
                     } else {
                         resolve(true)
                     }

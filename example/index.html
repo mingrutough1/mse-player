@@ -101,6 +101,9 @@
         <button onclick="playAudio()">音频-播放</button>
         <button onclick="mute(true)">音频-静音</button>
         <button onclick="mute(false)">音频-取消静音</button>
+        <button onclick="startRecord()">开始录制裸流</button>
+        <button onclick="endRecord()">结束录制裸流</button>
+        <button onclick="exportH264()">导出裸流</button>
       </div>
       <div class="input-container">
         <label for="openurl">
@@ -144,19 +147,43 @@
         MsePlayer,
         Enum: { CMD, PRESS_BUTTON, EEvent, ADB },
       } = WetestMsePlayer;
-      let player = null;
+      var player = null;
 
+      function startRecord() {
+        player.startRecording = true;
+        player.h264Data = [];
+        player.sendCommand({
+          cmd: 'startvideo',
+        });
+      }
+      function endRecord() {
+        player.startRecording = false;
+      }
+      function exportH264() {
+        const blob = new Blob(player.h264Data, { type: 'application/octet-stream' });
+
+        // Create a download link and trigger the download
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.style.display = 'none';
+        a.href = url;
+        a.download = 'output.h264';
+        document.body.appendChild(a);
+        a.click();
+        URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
       function startPlay() {
         player && player.reset();
         player = new MsePlayer({
           videoElement: document.getElementById("video"),
           audioElement: document.getElementById("audio"),
-          wsAddress: "wss://api.cloudtest.qq.com/v1/websocket/video",
+          wsAddress: "ws://test.udt.woa.com/v1/websocket/video",
           deviceId: Number(document.getElementById("deviceID").value),
           controlKey: document.getElementById("controlKey").value,
           testId: document.getElementById("testId").value,
           adminKey: document.getElementById("adminKey").value,
-          // disableAutoRotate: true,
+          disableAutoRotate: true,
         });
 
         document.getElementById('videoLoading').style.display = 'block'; // 简易loading
@@ -180,7 +207,7 @@
           console.log("on capture", e);
         });
         player.event.on(EEvent.DelayData, (e) => {
-          console.log("on delay data", e);
+          // console.log("on delay data", e);
         });
         player.event.on(EEvent.Clipboard, (e) => {
           console.log("on clipboard", e);

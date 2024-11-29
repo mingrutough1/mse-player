@@ -4,6 +4,7 @@ import { VideoMuxer } from "./muxer/video";
 import { AudioMuxer } from "./muxer/audio";
 import Jmuxer from "jmuxer";
 import { CMD, MSG, ROTATE_MSG, EEvent } from "./util/enum";
+import H264Parser from './util/h264-parser';
 
 import Touchpad from "./media/touch";
 import Keyboard from "./media/keyboard";
@@ -27,9 +28,12 @@ export default class MsePlayer {
     socketHeartBeat: number;
     socketCalcInterval: number;
 
+    startRecording: Boolean = false;
+    h264Data = [];
     disableAutoRotate: Boolean = false;
     touchpad: Touchpad;
     keyboard: Keyboard;
+    _screenInfo: { width: number, height: number } | null;
 
     event = eventEmiter;
 
@@ -231,16 +235,42 @@ export default class MsePlayer {
         }
     }
 
+    _hasScreenInfoChange = (newInfo: { width: number, height: number }) => {
+        return this._screenInfo?.width != newInfo.width || this._screenInfo.height != newInfo.height
+      }
+    
+    _updateScreenInfo = (info: { width: number, height: number }) => {
+        this._screenInfo = info;
+    }
     onSocketMessage = (event: MessageEvent) => {
         eventEmiter.emit(EEvent.SocketMessage, event);
         const messageData = new Uint8Array(event.data);
         switch (messageData[0]) {
             case MSG.H264:
                 this.calcFpsAndBytes(messageData);
+                const naluType = H264Parser.parseNALUType(messageData);
+                if (naluType === 7) {
+                    const { width, height } = H264Parser.readSPS(messageData.slice(4));
+                    const newInfo = {
+                        width,
+                        height
+                    }
+                    if (!this._screenInfo) {
+                        this._updateScreenInfo(newInfo);
+                    }
+                    if (this._hasScreenInfoChange(newInfo)) {
+                        console.log("MSE Player receive new SPS NALU");
+                        this.video.muxer.reset();
+                        this._updateScreenInfo(newInfo);
+                    }
+                }
+
                 this.video.muxer.feed({
                     video: messageData,
                 });
-
+                if(this.startRecording) {
+                    this.h264Data.push(messageData);
+                }
                 break;
 
             case MSG.AAC:
