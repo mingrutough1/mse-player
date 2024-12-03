@@ -594,6 +594,7 @@
                     checkDelay: 5000,
                     maxDelay: 1000,
                     onReady: function (isReset) {
+                        _this.muxer.mediaSource.duration = Number.POSITIVE_INFINITY;
                         if (isReset) ;
                         else {
                             resolve(true);
@@ -1184,6 +1185,7 @@
                 _this._screenInfo = info;
             };
             this.onSocketMessage = function (event) {
+                var _a, _b;
                 eventEmiter.emit(EEvent.SocketMessage, event);
                 var messageData = new Uint8Array(event.data);
                 switch (messageData[0]) {
@@ -1191,7 +1193,7 @@
                         _this.calcFpsAndBytes(messageData);
                         var naluType = H264Parser.parseNALUType(messageData);
                         if (naluType === 7) {
-                            var _a = H264Parser.readSPS(messageData.slice(4)), width = _a.width, height = _a.height;
+                            var _c = H264Parser.readSPS(messageData.slice(4)), width = _c.width, height = _c.height;
                             var newInfo = {
                                 width: width,
                                 height: height
@@ -1211,9 +1213,10 @@
                         if (_this.startRecording) {
                             _this.h264Data.push(messageData);
                         }
+                        _this.videoElement.play();
                         break;
                     case MSG.AAC:
-                        _this.audio.muxer.feed({
+                        (_b = (_a = _this.audio) === null || _a === void 0 ? void 0 : _a.muxer) === null || _b === void 0 ? void 0 : _b.feed({
                             audio: messageData,
                         });
                         break;

@@ -271,10 +271,11 @@ export default class MsePlayer {
                 if(this.startRecording) {
                     this.h264Data.push(messageData);
                 }
+                this.videoElement.play();
                 break;
 
             case MSG.AAC:
-                this.audio.muxer.feed({
+                this.audio?.muxer?.feed({
                     audio: messageData,
                 });
                 break;

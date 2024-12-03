@@ -60,6 +60,7 @@ export class VideoMuxer {
                 checkDelay: 5000,
                 maxDelay: 1000,
                 onReady: isReset => {
+                    this.muxer.mediaSource.duration = Number.POSITIVE_INFINITY;
                     if (isReset) {
                         // this.sendCommand({
                         //     cmd: CMD.StartStream,
