@@ -81,6 +81,9 @@
       <label for="testId">testId:</label>
       <input type="text" name="testId" id="testId" />
 
+      <label for="wsUrl">ws 地址:</label>
+      <input type="text" name="wsUrl" id="wsUrl" />
+
       <label for="adminKey">adminKey:</label>
       <input type="text" name="adminKey" id="adminKey" />
 
@@ -178,7 +181,7 @@
         player = new MsePlayer({
           videoElement: document.getElementById("video"),
           audioElement: document.getElementById("audio"),
-          wsAddress: "ws://test.udt.woa.com/v1/websocket/video",
+          wsAddress: document.getElementById("wsUrl").value,
           deviceId: Number(document.getElementById("deviceID").value),
           controlKey: document.getElementById("controlKey").value,
           testId: document.getElementById("testId").value,
@@ -341,11 +344,13 @@
         const controlKey = localStorage.getItem("controlKey");
         const testId = localStorage.getItem("testId");
         const adminKey = localStorage.getItem("adminKey");
+        const wsUrl = localStorage.getItem("wsUrl") || "wss://api.cloudtest.qq.com/v1/websocket/video";
 
         document.getElementById("deviceID").value = deviceId;
         document.getElementById("controlKey").value = controlKey;
         document.getElementById("testId").value = testId;
         document.getElementById("adminKey").value = adminKey;
+        document.getElementById("wsUrl").value = wsUrl;
       })();
 
       function savaDataLocal() {
@@ -353,11 +358,14 @@
         const controlKey = document.getElementById("controlKey").value;
         const testId = document.getElementById("testId").value;
         const adminKey = document.getElementById("adminKey").value;
+        const wsUrl = document.getElementById("wsUrl").value;
 
         localStorage.setItem("deviceId", deviceId);
         localStorage.setItem("controlKey", controlKey);
         localStorage.setItem("testId", testId);
         localStorage.setItem("adminKey", adminKey);
+        localStorage.setItem("wsUrl", wsUrl);
+        
       }
     </script>
   </body>

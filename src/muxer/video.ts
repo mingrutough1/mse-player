@@ -10,10 +10,12 @@ export class VideoMuxer {
     muxer: JMuxer;
     rotateValue: ROTATE_MSG;
     sendCommand: (object) => void;
+    fps: number = 30;
     constructor(options: IVideoMuxer) {
-        const { node, rotateValue, sendCommand } = options;
+        const { node, rotateValue, sendCommand, fps } = options;
         this.node = node;
         this.rotateValue = rotateValue;
+        this.fps = fps;
         this.sendCommand = sendCommand;
         this.addListener();
         this.node.style.cursor = `url(${cursorImg}), auto`;
@@ -55,7 +57,7 @@ export class VideoMuxer {
                 node: this.node,
                 clearBuffer: true,
                 debug: false,
-                fps: 30,
+                fps: this.fps,
                 flushingTime: 0,
                 checkDelay: 5000,
                 maxDelay: 1000,

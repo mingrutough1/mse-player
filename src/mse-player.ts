@@ -20,6 +20,7 @@ export default class MsePlayer {
     controlKey: string;
     adminKey: string;
     mode: "video" | "image" = "video";
+    fps: number = 30;
     video: VideoMuxer;
     audio: Jmuxer;
     muxerQuene: Promise<unknown>[] = [];
@@ -69,7 +70,8 @@ export default class MsePlayer {
             controlKey,
             adminKey,
             mode,
-            disableAutoRotate
+            disableAutoRotate,
+            fps,
         } = options;
         this.wsAddress = wsAddress;
         this.videoElement = videoElement;
@@ -80,6 +82,7 @@ export default class MsePlayer {
         this.adminKey = adminKey;
         this.mode = mode;
         this.disableAutoRotate = disableAutoRotate;
+        this.fps = fps;
 
         this.checkOptions();
     }
@@ -107,6 +110,7 @@ export default class MsePlayer {
             node: this.videoElement,
             rotateValue: this.rotateValue,
             sendCommand: this.sendCommand,
+            fps: this.fps
         });
         this.muxerQuene.push(this.video.init());
     }

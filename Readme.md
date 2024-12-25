@@ -58,6 +58,7 @@ interface IMsePlayerOption {
   audioElement?: HTMLAudioElement;
   disableAutoRotate?: Boolean;
   mode?: "video" | "image";
+  fps?: number;// 默认30
 }
 ```
 
@@ -70,6 +71,8 @@ interface IMsePlayerOption {
 - 【选填】 audioElement - audio 元素。当设备支持音频输出时，传入 audio 元素即可播放音频
 - 【选填】 disableAutoRotate - 画面自动旋转开关。默认为 false，安卓 14 以上须传 true
 - 【选填】 mode - 视频流 or 图片流。默认时视频流，当 websocket 服务返回的是图片流时传入 'image'
+- 【选填】 fps - 默认30
+
 
 上述鉴权相关参数：deviceId、testId、controlKey，可用两种方式获得：
 

@@ -12,6 +12,7 @@ export interface IMsePlayerOption  {
     audioElement?: HTMLAudioElement;
     disableAutoRotate?: Boolean;
     mode: 'video' | 'image';
+    fps?: number;
 }
 
 
@@ -23,6 +24,7 @@ export interface IVideoMuxer{
     node: MediaElementType;
     rotateValue: ROTATE_MSG
     sendCommand: (object) => void;
+    fps: number
 }
 
 export interface ITouchOptions {
