@@ -157,7 +157,6 @@ export default class MsePlayer {
     }
 
     sendCommand = (data: object) => {
-        console.log(data);
         this.socket.send(
             JSON.stringify(
                 Object.assign(data, {
