@@ -13,6 +13,7 @@ export interface IMsePlayerOption  {
     disableAutoRotate?: Boolean;
     mode: 'video' | 'image';
     fps?: number;
+    isPc?: boolean;
 }
 
 
@@ -31,6 +32,7 @@ export interface ITouchOptions {
     node: MediaElementType;
     rotateValue: ROTATE_MSG;
     sendCommand: (object) => void;
+    isPc?: boolean;
 }
 
 export interface IKeyBoardOptions {

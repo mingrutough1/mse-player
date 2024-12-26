@@ -43,6 +43,8 @@ export default class MsePlayer {
     bytesReceived = 0;
     prevSendDelayRequestTime: number;
 
+    isPc: boolean = false;
+
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
         this.initVideo();
@@ -72,6 +74,7 @@ export default class MsePlayer {
             mode,
             disableAutoRotate,
             fps,
+            isPc,
         } = options;
         this.wsAddress = wsAddress;
         this.videoElement = videoElement;
@@ -83,6 +86,7 @@ export default class MsePlayer {
         this.mode = mode;
         this.disableAutoRotate = disableAutoRotate;
         this.fps = fps;
+        this.isPc = isPc;
 
         this.checkOptions();
     }
@@ -147,6 +151,7 @@ export default class MsePlayer {
             node: this.videoElement,
             rotateValue: this.rotateValue,
             sendCommand: this.sendCommand,
+            isPc: this.isPc
         });
     }
 
@@ -156,7 +161,22 @@ export default class MsePlayer {
         });
     }
 
-    sendCommand = (data: object) => {
+    sendCommand = (data: object, isPc = false) => {
+        if (isPc) {
+            const msg = JSON.stringify(
+                {
+                    device_id: this.deviceId,
+                    test_id_str: this.testId,
+                    controlkey: this.controlKey,
+                    adminkey: this.adminKey,
+                    video_config: this.mode === "image" ? '{"video_mode": 2}' : "",
+                    cmd: "bridgecmd",
+                    content: `@proxy:ctrl:conn:${JSON.stringify(data)}`
+                }
+            )
+            this.socket.send(msg);
+            return;
+        }
         this.socket.send(
             JSON.stringify(
                 Object.assign(data, {
@@ -224,9 +244,9 @@ export default class MsePlayer {
         this.frameCount++;
         this.bytesReceived += messageData.byteLength;
 
-        if (this.lastCalc === 0){
+        if (this.lastCalc === 0) {
             this.lastCalc = now;
-        }else if (now - this.lastCalc > 1000){
+        } else if (now - this.lastCalc > 1000) {
             const result = {
                 fps: Math.ceil((this.frameCount * 1000) / (now - this.lastCalc)),
                 netSpeed: ((this.bytesReceived * 1000) / (1024 * (now - this.lastCalc))).toFixed(2),
@@ -240,8 +260,8 @@ export default class MsePlayer {
 
     _hasScreenInfoChange = (newInfo: { width: number, height: number }) => {
         return this._screenInfo?.width != newInfo.width || this._screenInfo.height != newInfo.height
-      }
-    
+    }
+
     _updateScreenInfo = (info: { width: number, height: number }) => {
         this._screenInfo = info;
     }
@@ -271,7 +291,7 @@ export default class MsePlayer {
                 this.video.muxer.feed({
                     video: messageData,
                 });
-                if(this.startRecording) {
+                if (this.startRecording) {
                     this.h264Data.push(messageData);
                 }
                 this.videoElement.play();
@@ -317,7 +337,7 @@ export default class MsePlayer {
                 // }
                 // web => webvideosvr => videosvr => pc(phone)
                 const msg = JSON.parse(String.fromCharCode.apply(null, new Uint8Array(messageData.slice(1))));
-                if (msg.web_req_time !== this.prevSendDelayRequestTime){
+                if (msg.web_req_time !== this.prevSendDelayRequestTime) {
                     return;
                 }
                 const web_video_to_pc = (msg.webvideo_resp_time - msg.webvideo_req_time) / 2;
@@ -357,7 +377,7 @@ export default class MsePlayer {
                 }
                 break;
             default:
-            console.warn("useless message data");
+                console.warn("useless message data");
         }
     }
     onSocketError = (e) => {

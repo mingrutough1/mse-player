@@ -3,3 +3,19 @@ export const cursorImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAY
 export const NoKeyPressEventCode = [
     8, // Backspace
 ]
+
+export const MOUSE_BUTTON_DOWN_EVENT_MAGIC_GEN5 = 0x00000008;
+export const MOUSE_BUTTON_UP_EVENT_MAGIC_GEN5 = 0x00000009;
+export const MOUSE_MOVE_REL_MAGIC_GEN5 = 0x00000007;
+export const SCROLL_MAGIC_GEN5 = 0x0000000A;
+export const KEY_DOWN_EVENT_MAGIC = 0x00000003;
+export const KEY_UP_EVENT_MAGIC = 0x00000004;
+export const UTF8_TEXT_EVENT_MAGIC = 0x00000017;
+
+
+export const MOUSE_BUTTON_LEFT =  0x01;
+export const MOUSE_BUTTON_RIGHT =  0x03;
+export const MODIFIER_SHIFT = 0x01;
+export const MODIFIER_CTRL = 0x02;
+export const MODIFIER_ALT = 0x04;
+export const MODIFIER_META = 0x08;

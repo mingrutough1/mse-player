@@ -68,3 +68,9 @@ export enum ROTATE_MSG {
     '-180degrees',
     '-270degrees',
 }
+
+
+export enum PcCustomEventType {
+  Event = 1,
+  Text = 2,
+}

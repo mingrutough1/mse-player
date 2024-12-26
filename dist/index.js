@@ -73,6 +73,11 @@
         ROTATE_MSG[ROTATE_MSG["-180degrees"] = 2] = "-180degrees";
         ROTATE_MSG[ROTATE_MSG["-270degrees"] = 3] = "-270degrees";
     })(ROTATE_MSG || (ROTATE_MSG = {}));
+    var PcCustomEventType;
+    (function (PcCustomEventType) {
+        PcCustomEventType[PcCustomEventType["Event"] = 1] = "Event";
+        PcCustomEventType[PcCustomEventType["Text"] = 2] = "Text";
+    })(PcCustomEventType || (PcCustomEventType = {}));
 
     var _enum = /*#__PURE__*/Object.freeze({
         __proto__: null,
@@ -81,6 +86,7 @@
         get EEvent () { return EEvent; },
         get MSG () { return MSG; },
         get PRESS_BUTTON () { return PRESS_BUTTON; },
+        get PcCustomEventType () { return PcCustomEventType; },
         get ROTATE_MSG () { return ROTATE_MSG; },
         get TOUCH () { return TOUCH; }
     });
@@ -156,9 +162,91 @@
         return e.name = "SuppressedError", e.error = error, e.suppressed = suppressed, e;
     };
 
+    var PositonRatio = 100000;
+    var cursorImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMSAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjEtMDMtMDJUMTU6MzY6MTkrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIxLTAzLTAyVDE1OjM4OjU1KzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIxLTAzLTAyVDE1OjM4OjU1KzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMSIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9IkRvdCBHYWluIDE1JSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1NDY0YWNjZS01NDQ2LTRjNTYtOTYzYS1kNTczZmJlYmEyMTYiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDoxZGU2NmYyMS00NTQwLTliNDktODYyNy1hMTk0NzdmOTFlNDYiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo4Yjk2ZTBiMC02NDhkLTQ2NTAtYWNmOC1lMzEyMWM0MjI5YmMiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjhiOTZlMGIwLTY0OGQtNDY1MC1hY2Y4LWUzMTIxYzQyMjliYyIgc3RFdnQ6d2hlbj0iMjAyMS0wMy0wMlQxNTozNjoxOSswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjEgKE1hY2ludG9zaCkiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjU0NjRhY2NlLTU0NDYtNGM1Ni05NjNhLWQ1NzNmYmViYTIxNiIgc3RFdnQ6d2hlbj0iMjAyMS0wMy0wMlQxNTozODo1NSswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjEgKE1hY2ludG9zaCkiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+5ucw2gAAAk1JREFUOMuVkz9MU1EUxg+lUFIKpUXaikBriKKQWJtQ0mIHhACaVowYhsYWN40GNwxBHViaLkw6lJWBhBgXU+KgI00IKyFxawkU6GYnKAx8fu/1b2iJ8f6ae0/P+c65J+/eK5D/o2q0SLB3bjYYCUY497bI1aNOmVwj3xPpI2whTraOj34kXCPlaJV8PnaSwwruoV7dXkNr5ST3PlYrhX8j33AGlyrVwUB055ITes6iX2vsMRsFYKa4g1wroNhCL8LRS9W7+7KA/0LQhU5yg3QW6KI3kEV3X3kXLgtr2GQtOxwqxdWBm8TOyObCWmVbrb+SeA09+nCrgtsl9Hj1MymtpZ6svvQhvKw0gH4yUIUd3vSh1VdqaDh0noST0vsqLpVKux/Os5QnlFfzNxQ+TcHNlKECblKcFZxwn6bc4VJC+9j+Mfys5FN5UFjLuBDYz7SPFRO0YttIYgl3MYqHFYwQZR3FHSxtpOQ6lep3ahJ5s45duscxUWKSTKiecX693bfreaUyGqXJOHwAfOTdmUKgwJPCOkXvhwMYhylvzCdoeKcb/F94NWbgwXMyrfJMtT30wv9ZGqjSFA9CJyZpexdnyjzPY5LiGTJNy0sP5uJipEJXvk0aaRaz2F6uZi6QwCe8wFMSYpObGcyuio3R5nJ9ZWh58BYx9YSXt3ey2MNvsrfzZ3m7J8zaFka1l5+Qlj3apEMcev/g4qPY49jgot4vDnpsjGhrPdJ6fgcTwzZWtBKLapvorb/6XStJBmljz2bOBlVcJ/8YSlqeGtK/waCRFVrpBogAAAAASUVORK5CYII=';
+    var NoKeyPressEventCode = [
+        8, // Backspace
+    ];
+    var MOUSE_BUTTON_DOWN_EVENT_MAGIC_GEN5 = 0x00000008;
+    var MOUSE_BUTTON_UP_EVENT_MAGIC_GEN5 = 0x00000009;
+    var MOUSE_MOVE_REL_MAGIC_GEN5 = 0x00000007;
+    var SCROLL_MAGIC_GEN5 = 0x0000000A;
+    var KEY_DOWN_EVENT_MAGIC = 0x00000003;
+    var KEY_UP_EVENT_MAGIC = 0x00000004;
+    var UTF8_TEXT_EVENT_MAGIC = 0x00000017;
+    var MOUSE_BUTTON_LEFT = 0x01;
+    var MOUSE_BUTTON_RIGHT = 0x03;
+    var MODIFIER_SHIFT = 0x01;
+    var MODIFIER_CTRL = 0x02;
+    var MODIFIER_ALT = 0x04;
+    var MODIFIER_META = 0x08;
+
     var isSafari = function () {
         return /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
     };
+    function createProtocolData(type, data) {
+        var buffer = new ArrayBuffer(0);
+        var view = new DataView(buffer);
+        var offset = 0;
+        function writeHeader(size, magicCode) {
+            buffer = new ArrayBuffer(size);
+            view = new DataView(buffer);
+            view.setUint32(offset, size - 8, false); // size (Big Endian)
+            offset += 4;
+            view.setUint32(offset, magicCode, true); // magic_code (Little Endian)
+            offset += 4;
+            return view;
+        }
+        switch (type) {
+            case 'mouseBtn':
+                writeHeader(9, data.isDown ? MOUSE_BUTTON_DOWN_EVENT_MAGIC_GEN5 : MOUSE_BUTTON_UP_EVENT_MAGIC_GEN5);
+                view.setUint8(offset, data.button);
+                break;
+            case 'mouseMove':
+                writeHeader(12, MOUSE_MOVE_REL_MAGIC_GEN5);
+                view.setInt16(offset, data.deltaX, false);
+                offset += 2;
+                view.setInt16(offset, data.deltaY, false);
+                break;
+            case 'scroll':
+                writeHeader(10, SCROLL_MAGIC_GEN5);
+                view.setInt16(offset, data.scrollAmt1, false);
+                break;
+            case 'keyboard':
+                writeHeader(12, data.isDown ? KEY_DOWN_EVENT_MAGIC : KEY_UP_EVENT_MAGIC);
+                view.setUint8(offset, data.flags);
+                offset += 1;
+                view.setInt16(offset, data.keyCode, true);
+                offset += 2;
+                view.setUint8(offset, data.modifiers);
+                break;
+            case 'text':
+                writeHeader(4 + 4 + data.text.length, UTF8_TEXT_EVENT_MAGIC);
+                for (var i = 0; i < data.text.length; i++) {
+                    view.setUint8(offset, data.text.charCodeAt(i));
+                    offset += 1;
+                }
+                break;
+            default:
+                throw new Error('Unknown protocol type');
+        }
+        return buffer;
+    }
+    function buildCustomEvent(type, data) {
+        var payload = arrayBufferToStr(new Uint8Array(data));
+        return {
+            type: 221,
+            customEvent: {
+                type: type,
+                payloadLen: data.byteLength,
+                payload: payload
+            }
+        };
+    }
+    function arrayBufferToStr(uint8Array) {
+        var binary = String.fromCharCode.apply(null, uint8Array);
+        return window.btoa(binary);
+    }
     /**
      * Gets the target node from a native browser event by accounting for
      * inconsistencies in browser DOM APIs.
@@ -538,12 +626,6 @@
     var EventEmitter = /*@__PURE__*/getDefaultExportFromCjs(eventemitter3Exports);
 
     var eventEmiter = new EventEmitter();
-
-    var PositonRatio = 100000;
-    var cursorImg = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAQAAABKfvVzAAAACXBIWXMAAAsTAAALEwEAmpwYAAAF8mlUWHRYTUw6Y29tLmFkb2JlLnhtcAAAAAAAPD94cGFja2V0IGJlZ2luPSLvu78iIGlkPSJXNU0wTXBDZWhpSHpyZVN6TlRjemtjOWQiPz4gPHg6eG1wbWV0YSB4bWxuczp4PSJhZG9iZTpuczptZXRhLyIgeDp4bXB0az0iQWRvYmUgWE1QIENvcmUgNS42LWMxNDggNzkuMTY0MDM2LCAyMDE5LzA4LzEzLTAxOjA2OjU3ICAgICAgICAiPiA8cmRmOlJERiB4bWxuczpyZGY9Imh0dHA6Ly93d3cudzMub3JnLzE5OTkvMDIvMjItcmRmLXN5bnRheC1ucyMiPiA8cmRmOkRlc2NyaXB0aW9uIHJkZjphYm91dD0iIiB4bWxuczp4bXA9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC8iIHhtbG5zOmRjPSJodHRwOi8vcHVybC5vcmcvZGMvZWxlbWVudHMvMS4xLyIgeG1sbnM6cGhvdG9zaG9wPSJodHRwOi8vbnMuYWRvYmUuY29tL3Bob3Rvc2hvcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RFdnQ9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZUV2ZW50IyIgeG1wOkNyZWF0b3JUb29sPSJBZG9iZSBQaG90b3Nob3AgMjEuMSAoTWFjaW50b3NoKSIgeG1wOkNyZWF0ZURhdGU9IjIwMjEtMDMtMDJUMTU6MzY6MTkrMDg6MDAiIHhtcDpNb2RpZnlEYXRlPSIyMDIxLTAzLTAyVDE1OjM4OjU1KzA4OjAwIiB4bXA6TWV0YWRhdGFEYXRlPSIyMDIxLTAzLTAyVDE1OjM4OjU1KzA4OjAwIiBkYzpmb3JtYXQ9ImltYWdlL3BuZyIgcGhvdG9zaG9wOkNvbG9yTW9kZT0iMSIgcGhvdG9zaG9wOklDQ1Byb2ZpbGU9IkRvdCBHYWluIDE1JSIgeG1wTU06SW5zdGFuY2VJRD0ieG1wLmlpZDo1NDY0YWNjZS01NDQ2LTRjNTYtOTYzYS1kNTczZmJlYmEyMTYiIHhtcE1NOkRvY3VtZW50SUQ9ImFkb2JlOmRvY2lkOnBob3Rvc2hvcDoxZGU2NmYyMS00NTQwLTliNDktODYyNy1hMTk0NzdmOTFlNDYiIHhtcE1NOk9yaWdpbmFsRG9jdW1lbnRJRD0ieG1wLmRpZDo4Yjk2ZTBiMC02NDhkLTQ2NTAtYWNmOC1lMzEyMWM0MjI5YmMiPiA8eG1wTU06SGlzdG9yeT4gPHJkZjpTZXE+IDxyZGY6bGkgc3RFdnQ6YWN0aW9uPSJjcmVhdGVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjhiOTZlMGIwLTY0OGQtNDY1MC1hY2Y4LWUzMTIxYzQyMjliYyIgc3RFdnQ6d2hlbj0iMjAyMS0wMy0wMlQxNTozNjoxOSswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjEgKE1hY2ludG9zaCkiLz4gPHJkZjpsaSBzdEV2dDphY3Rpb249InNhdmVkIiBzdEV2dDppbnN0YW5jZUlEPSJ4bXAuaWlkOjU0NjRhY2NlLTU0NDYtNGM1Ni05NjNhLWQ1NzNmYmViYTIxNiIgc3RFdnQ6d2hlbj0iMjAyMS0wMy0wMlQxNTozODo1NSswODowMCIgc3RFdnQ6c29mdHdhcmVBZ2VudD0iQWRvYmUgUGhvdG9zaG9wIDIxLjEgKE1hY2ludG9zaCkiIHN0RXZ0OmNoYW5nZWQ9Ii8iLz4gPC9yZGY6U2VxPiA8L3htcE1NOkhpc3Rvcnk+IDwvcmRmOkRlc2NyaXB0aW9uPiA8L3JkZjpSREY+IDwveDp4bXBtZXRhPiA8P3hwYWNrZXQgZW5kPSJyIj8+5ucw2gAAAk1JREFUOMuVkz9MU1EUxg+lUFIKpUXaikBriKKQWJtQ0mIHhACaVowYhsYWN40GNwxBHViaLkw6lJWBhBgXU+KgI00IKyFxawkU6GYnKAx8fu/1b2iJ8f6ae0/P+c65J+/eK5D/o2q0SLB3bjYYCUY497bI1aNOmVwj3xPpI2whTraOj34kXCPlaJV8PnaSwwruoV7dXkNr5ST3PlYrhX8j33AGlyrVwUB055ITes6iX2vsMRsFYKa4g1wroNhCL8LRS9W7+7KA/0LQhU5yg3QW6KI3kEV3X3kXLgtr2GQtOxwqxdWBm8TOyObCWmVbrb+SeA09+nCrgtsl9Hj1MymtpZ6svvQhvKw0gH4yUIUd3vSh1VdqaDh0noST0vsqLpVKux/Os5QnlFfzNxQ+TcHNlKECblKcFZxwn6bc4VJC+9j+Mfys5FN5UFjLuBDYz7SPFRO0YttIYgl3MYqHFYwQZR3FHSxtpOQ6lep3ahJ5s45duscxUWKSTKiecX693bfreaUyGqXJOHwAfOTdmUKgwJPCOkXvhwMYhylvzCdoeKcb/F94NWbgwXMyrfJMtT30wv9ZGqjSFA9CJyZpexdnyjzPY5LiGTJNy0sP5uJipEJXvk0aaRaz2F6uZi6QwCe8wFMSYpObGcyuio3R5nJ9ZWh58BYx9YSXt3ey2MNvsrfzZ3m7J8zaFka1l5+Qlj3apEMcev/g4qPY49jgot4vDnpsjGhrPdJ6fgcTwzZWtBKLapvorb/6XStJBmljz2bOBlVcJ/8YSlqeGtK/waCRFVrpBogAAAAASUVORK5CYII=';
-    var NoKeyPressEventCode = [
-        8, // Backspace
-    ];
 
     var VideoMuxer = /** @class */ (function () {
         function VideoMuxer(options) {
@@ -989,9 +1071,152 @@
             var _this = this;
             this.hasBind = false;
             this.touchStart = false;
+            this.isPc = false;
             this.rotateValue = ROTATE_MSG["0degrees"];
+            this._pcMouseSpeedFactor = 1.0;
+            this.exitPointerMethod = "esc";
+            this._requestPointerLock = function () { return __awaiter(_this, void 0, void 0, function () {
+                var _a, _b;
+                return __generator(this, function (_c) {
+                    switch (_c.label) {
+                        case 0:
+                            if (document.pointerLockElement) {
+                                return [2 /*return*/];
+                            }
+                            return [4 /*yield*/, ((_a = this.pointerLockElement) === null || _a === void 0 ? void 0 : _a.requestPointerLock())];
+                        case 1:
+                            _c.sent();
+                            this._addPointerLockEvent();
+                            this.pointerLockElement.tabIndex = 1;
+                            // focus需要元素设置有tabindex大于等于0的值
+                            (_b = this.pointerLockElement) === null || _b === void 0 ? void 0 : _b.focus();
+                            return [2 /*return*/];
+                    }
+                });
+            }); };
+            this._watchLockChange = function () {
+                if (!document.pointerLockElement) {
+                    // 1. 如果lock函数不存在，则不支持navigator.keyboard.lock, 无法支持Esc拦截，需要自主发送一个
+                    // 2. 即便lock函数存在，长按会导致pointerLock退出，无法再接收到keyUp时间也会异常，所以也需要再自助发送一个
+                    // 创建一个键盘事件对象
+                    if (_this.exitPointerMethod === "esc" && !document.fullscreenElement) {
+                        // esc 退出补发事件，manual 退出不发事件。全屏状态下不发事件
+                        var escKeyEvent = new KeyboardEvent("keydown", {
+                            key: "Escape",
+                            keyCode: 27, // 旧的属性，为了兼容性
+                            code: "Escape",
+                            which: 27, // 旧的属性，为了兼容性
+                            bubbles: true, // 事件是否冒泡
+                            cancelable: true, // 事件是否可以取消
+                        });
+                        _this._handlePointerLockKeyDown(escKeyEvent);
+                        _this._handlePointerLockKeyUp(escKeyEvent);
+                    }
+                    _this._removePointerLockEvent();
+                }
+            };
+            this._addPointerLockEvent = function () {
+                document.addEventListener("pointerlockchange", _this._watchLockChange);
+                // this.pointerLockElement.addEventListener(
+                //     "click",
+                //     this._requestPointerLock
+                // );
+                _this.pointerLockElement.addEventListener("mousedown", _this._handleLockedMouseDown);
+                _this.pointerLockElement.addEventListener("mouseup", _this._handleLockedMouseUp);
+                _this.pointerLockElement.addEventListener("mousemove", _this._handlePointerLockMovement);
+                _this.pointerLockElement.addEventListener("keydown", _this._handlePointerLockKeyDown);
+                _this.pointerLockElement.addEventListener("keyup", _this._handlePointerLockKeyUp);
+                _this.pointerLockElement.addEventListener("wheel", _this._handlePointerLockMouseWheel, { passive: false });
+            };
+            this._removePointerLockEvent = function () {
+                document.removeEventListener("pointerlockchange", _this._watchLockChange);
+                _this.pointerLockElement.removeEventListener("mousedown", _this._handleLockedMouseDown);
+                _this.pointerLockElement.removeEventListener("mouseup", _this._handleLockedMouseUp);
+                _this.pointerLockElement.removeEventListener("mousemove", _this._handlePointerLockMovement);
+                _this.pointerLockElement.removeEventListener("keydown", _this._handlePointerLockKeyDown);
+                _this.pointerLockElement.removeEventListener("keyup", _this._handlePointerLockKeyDown);
+                _this.pointerLockElement.removeEventListener("wheel", _this._handlePointerLockMouseWheel);
+            };
+            this._handleLockedMouseDown = function (ev, isUp) {
+                var isLeft = ev.button === 0;
+                var mouseBtnData = createProtocolData("mouseBtn", {
+                    isDown: !isUp,
+                    button: isLeft ? MOUSE_BUTTON_LEFT : MOUSE_BUTTON_RIGHT,
+                });
+                _this.sendCommand(buildCustomEvent(PcCustomEventType.Event, mouseBtnData), true);
+            };
+            this._handleLockedMouseUp = function (ev) {
+                _this._handleLockedMouseDown(ev, true);
+            };
+            this._handlePointerLockMovement = function (ev) {
+                if (!document.pointerLockElement) {
+                    return;
+                }
+                var mouseMoveData = createProtocolData("mouseMove", {
+                    deltaX: ev.movementX * _this._pcMouseSpeedFactor,
+                    deltaY: ev.movementY * _this._pcMouseSpeedFactor,
+                });
+                _this.sendCommand(buildCustomEvent(PcCustomEventType.Event, mouseMoveData), true);
+            };
+            this._handlePointerLockKeyDown = function (ev, isUp) {
+                console.log('keydown');
+                if (["Tab", "Meta", "Shift", "CapsLock"].includes(ev.key) ||
+                    ev.metaKey ||
+                    ev.shiftKey ||
+                    ev.altKey ||
+                    ev.ctrlKey) {
+                    ev.preventDefault();
+                }
+                if (ev.code === "CapsLock" && ev.shiftKey && ev.ctrlKey) {
+                    // 组合键退出pointerlock
+                    console.log("退出鼠标锁定,全屏");
+                    document.fullscreenElement && document.exitFullscreen();
+                    document.pointerLockElement && document.exitPointerLock();
+                    _this.exitPointerMethod = "manual";
+                    setTimeout(function () {
+                        _this.exitPointerMethod = "esc";
+                    }, 1000);
+                }
+                var mouseMoveData = createProtocolData("keyboard", {
+                    isDown: !isUp,
+                    flags: 0,
+                    keyCode: ev.keyCode,
+                    modifiers: _this._calculateLockModifierStae(ev),
+                });
+                _this.sendCommand(buildCustomEvent(PcCustomEventType.Event, mouseMoveData), true);
+                return;
+            };
+            this._handlePointerLockKeyUp = function (ev) {
+                _this._handlePointerLockKeyDown(ev, true);
+            };
+            this._handlePointerLockMouseWheel = function (ev) {
+                ev.preventDefault();
+                var mouseWheelData = createProtocolData("scroll", {
+                    scrollAmt1: -parseInt(ev.deltaY.toString()),
+                });
+                _this.sendCommand(buildCustomEvent(PcCustomEventType.Event, mouseWheelData), true);
+            };
+            this._calculateLockModifierStae = function (event) {
+                var modifier = 0; // 初始化修饰键状态为0
+                if (event.shiftKey) {
+                    modifier |= MODIFIER_SHIFT;
+                }
+                if (event.ctrlKey) {
+                    modifier |= MODIFIER_CTRL;
+                }
+                if (event.altKey) {
+                    modifier |= MODIFIER_ALT;
+                }
+                if (event.metaKey) {
+                    modifier |= MODIFIER_META;
+                }
+                return modifier;
+            };
             this.handleMousedown = function (e) {
                 _this.touchStart = true;
+                if (_this.isPc) {
+                    return;
+                }
                 // todo 支持多指
                 var obj = __assign({ cmd: CMD.Touch, ptype: TOUCH.Start }, _this.calcPos(e));
                 _this.sendCommand(obj);
@@ -1011,9 +1236,10 @@
                 var obj = __assign({ cmd: CMD.Touch, ptype: TOUCH.End }, _this.calcPos(e));
                 _this.sendCommand(obj);
             };
-            var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand;
+            var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand, isPc = options.isPc;
             this.node = node;
             this.rotateValue = rotateValue;
+            this.isPc = isPc;
             this.sendCommand = sendCommand;
             this.addListener();
         }
@@ -1022,6 +1248,13 @@
             document.addEventListener("mousemove", this.handleMouseover); // mousemove、mouseup 需监听document ，否则鼠标移出画面将不能正常响应
             document.addEventListener("mouseup", this.handleMouseup);
             this.hasBind = true;
+            if (this.isPc) {
+                console.log('bind pc event');
+                this.pointerLockElement = this.node;
+                this._removePointerLockEvent();
+                this.pointerLockElement.addEventListener("click", this._requestPointerLock);
+                // this._addPointerLockEvent();
+            }
         };
         Touch.prototype.calcPos = function (e) {
             var rect = this.node.getBoundingClientRect();
@@ -1121,8 +1354,22 @@
             this.lastCalc = 0;
             this.frameCount = 0;
             this.bytesReceived = 0;
-            this.sendCommand = function (data) {
-                console.log(data);
+            this.isPc = false;
+            this.sendCommand = function (data, isPc) {
+                if (isPc === void 0) { isPc = false; }
+                if (isPc) {
+                    var msg = JSON.stringify({
+                        device_id: _this.deviceId,
+                        test_id_str: _this.testId,
+                        controlkey: _this.controlKey,
+                        adminkey: _this.adminKey,
+                        video_config: _this.mode === "image" ? '{"video_mode": 2}' : "",
+                        cmd: "bridgecmd",
+                        content: "@proxy:ctrl:conn:".concat(JSON.stringify(data))
+                    });
+                    _this.socket.send(msg);
+                    return;
+                }
                 _this.socket.send(JSON.stringify(Object.assign(data, {
                     device_id: _this.deviceId,
                     test_id_str: _this.testId,
@@ -1329,7 +1576,7 @@
             configurable: true
         });
         MsePlayer.prototype.initOption = function (options) {
-            var wsAddress = options.wsAddress, videoElement = options.videoElement, audioElement = options.audioElement, deviceId = options.deviceId, testId = options.testId, controlKey = options.controlKey, adminKey = options.adminKey, mode = options.mode, disableAutoRotate = options.disableAutoRotate, fps = options.fps;
+            var wsAddress = options.wsAddress, videoElement = options.videoElement, audioElement = options.audioElement, deviceId = options.deviceId, testId = options.testId, controlKey = options.controlKey, adminKey = options.adminKey, mode = options.mode, disableAutoRotate = options.disableAutoRotate, fps = options.fps, isPc = options.isPc;
             this.wsAddress = wsAddress;
             this.videoElement = videoElement;
             this.audioElement = audioElement;
@@ -1340,6 +1587,7 @@
             this.mode = mode;
             this.disableAutoRotate = disableAutoRotate;
             this.fps = fps;
+            this.isPc = isPc;
             this.checkOptions();
         };
         MsePlayer.prototype.checkOptions = function () {
@@ -1406,6 +1654,7 @@
                 node: this.videoElement,
                 rotateValue: this.rotateValue,
                 sendCommand: this.sendCommand,
+                isPc: this.isPc
             });
         };
         MsePlayer.prototype.initKeyboard = function () {
