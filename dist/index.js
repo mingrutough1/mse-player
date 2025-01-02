@@ -1212,6 +1212,20 @@
                 }
                 return modifier;
             };
+            this.requestFullScreen = function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    switch (_a.label) {
+                        case 0: return [4 /*yield*/, this.pointerLockElement.requestFullscreen()];
+                        case 1:
+                            _a.sent();
+                            return [4 /*yield*/, this._requestPointerLock()];
+                        case 2:
+                            _a.sent();
+                            navigator.keyboard && navigator.keyboard.lock();
+                            return [2 /*return*/];
+                    }
+                });
+            }); };
             this.handleMousedown = function (e) {
                 _this.touchStart = true;
                 if (_this.isPc) {
@@ -1378,6 +1392,12 @@
                     video_config: _this.mode === "image" ? '{"video_mode": 2}' : "",
                 })));
             };
+            this.requestFullScreen = function () { return __awaiter(_this, void 0, void 0, function () {
+                return __generator(this, function (_a) {
+                    this.touchpad.requestFullScreen();
+                    return [2 /*return*/];
+                });
+            }); };
             this.rotate = function (rotateValue) {
                 if (typeof rotateValue !== 'number') {
                     _this.rotateValue++;

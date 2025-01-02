@@ -189,6 +189,9 @@ export default class MsePlayer {
             )
         );
     };
+    requestFullScreen = async () => {
+        this.touchpad.requestFullScreen();
+    }
 
     rotate = (rotateValue) => {
         if (typeof rotateValue !== 'number') {

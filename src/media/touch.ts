@@ -208,6 +208,11 @@ export default class Touch {
         }
         return modifier;
     };
+    public requestFullScreen = async () => {
+        await (this.pointerLockElement as HTMLElement).requestFullscreen();
+        await this._requestPointerLock();
+        (navigator as any).keyboard && (navigator as any).keyboard.lock();
+    }
     calcPos(e) {
         const rect = this.node.getBoundingClientRect();
         let width = this.node.offsetWidth;
