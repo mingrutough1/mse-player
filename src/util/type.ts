@@ -14,6 +14,7 @@ export interface IMsePlayerOption  {
     mode: 'video' | 'image';
     fps?: number;
     isPc?: boolean;
+    mouseSensitivity?: number
 }
 
 
@@ -33,6 +34,7 @@ export interface ITouchOptions {
     rotateValue: ROTATE_MSG;
     sendCommand: (object) => void;
     isPc?: boolean;
+    mouseSensitivity?: number;
 }
 
 export interface IKeyBoardOptions {

@@ -1250,10 +1250,11 @@
                 var obj = __assign({ cmd: CMD.Touch, ptype: TOUCH.End }, _this.calcPos(e));
                 _this.sendCommand(obj);
             };
-            var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand, isPc = options.isPc;
+            var node = options.node, rotateValue = options.rotateValue, sendCommand = options.sendCommand, isPc = options.isPc, mouseSensitivity = options.mouseSensitivity;
             this.node = node;
             this.rotateValue = rotateValue;
             this.isPc = isPc;
+            this._pcMouseSpeedFactor = mouseSensitivity;
             this.sendCommand = sendCommand;
             this.addListener();
         }
@@ -1369,6 +1370,7 @@
             this.frameCount = 0;
             this.bytesReceived = 0;
             this.isPc = false;
+            this.mouseSensitivity = 1.0;
             this.sendCommand = function (data, isPc) {
                 if (isPc === void 0) { isPc = false; }
                 if (isPc) {
@@ -1596,7 +1598,7 @@
             configurable: true
         });
         MsePlayer.prototype.initOption = function (options) {
-            var wsAddress = options.wsAddress, videoElement = options.videoElement, audioElement = options.audioElement, deviceId = options.deviceId, testId = options.testId, controlKey = options.controlKey, adminKey = options.adminKey, mode = options.mode, disableAutoRotate = options.disableAutoRotate, fps = options.fps, isPc = options.isPc;
+            var wsAddress = options.wsAddress, videoElement = options.videoElement, audioElement = options.audioElement, deviceId = options.deviceId, testId = options.testId, controlKey = options.controlKey, adminKey = options.adminKey, mode = options.mode, disableAutoRotate = options.disableAutoRotate, fps = options.fps, isPc = options.isPc, mouseSensitivity = options.mouseSensitivity;
             this.wsAddress = wsAddress;
             this.videoElement = videoElement;
             this.audioElement = audioElement;
@@ -1608,6 +1610,7 @@
             this.disableAutoRotate = disableAutoRotate;
             this.fps = fps;
             this.isPc = isPc;
+            this.mouseSensitivity = mouseSensitivity;
             this.checkOptions();
         };
         MsePlayer.prototype.checkOptions = function () {
@@ -1674,7 +1677,8 @@
                 node: this.videoElement,
                 rotateValue: this.rotateValue,
                 sendCommand: this.sendCommand,
-                isPc: this.isPc
+                isPc: this.isPc,
+                mouseSensitivity: this.mouseSensitivity
             });
         };
         MsePlayer.prototype.initKeyboard = function () {

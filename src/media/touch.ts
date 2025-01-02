@@ -16,10 +16,11 @@ export default class Touch {
     private exitPointerMethod: "esc" | "manual" = "esc";
 
     constructor(options: ITouchOptions) {
-        const { node, rotateValue, sendCommand, isPc } = options;
+        const { node, rotateValue, sendCommand, isPc, mouseSensitivity } = options;
         this.node = node;
         this.rotateValue = rotateValue;
         this.isPc = isPc;
+        this._pcMouseSpeedFactor = mouseSensitivity;
         this.sendCommand = sendCommand;
         this.addListener();
     }

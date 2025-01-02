@@ -44,6 +44,7 @@ export default class MsePlayer {
     prevSendDelayRequestTime: number;
 
     isPc: boolean = false;
+    mouseSensitivity = 1.0;
 
     constructor(options: IMsePlayerOption) {
         this.initOption(options);
@@ -75,6 +76,7 @@ export default class MsePlayer {
             disableAutoRotate,
             fps,
             isPc,
+            mouseSensitivity
         } = options;
         this.wsAddress = wsAddress;
         this.videoElement = videoElement;
@@ -87,6 +89,7 @@ export default class MsePlayer {
         this.disableAutoRotate = disableAutoRotate;
         this.fps = fps;
         this.isPc = isPc;
+        this.mouseSensitivity = mouseSensitivity;
 
         this.checkOptions();
     }
@@ -151,7 +154,8 @@ export default class MsePlayer {
             node: this.videoElement,
             rotateValue: this.rotateValue,
             sendCommand: this.sendCommand,
-            isPc: this.isPc
+            isPc: this.isPc,
+            mouseSensitivity: this.mouseSensitivity
         });
     }
 
