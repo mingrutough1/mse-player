@@ -91,6 +91,10 @@ export default class MsePlayer {
         this.isPc = isPc;
         this.mouseSensitivity = mouseSensitivity;
 
+        if(isPc) {
+            this.fps = 60;
+        }
+
         this.checkOptions();
     }
 
@@ -179,6 +183,7 @@ export default class MsePlayer {
                 }
             )
             this.socket.send(msg);
+            console.log(msg);
             return;
         }
         this.socket.send(

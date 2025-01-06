@@ -20,11 +20,22 @@ export default class Touch {
         this.node = node;
         this.rotateValue = rotateValue;
         this.isPc = isPc;
-        this._pcMouseSpeedFactor = mouseSensitivity;
+        this._pcMouseSpeedFactor = mouseSensitivity || 1.0;
         this.sendCommand = sendCommand;
         this.addListener();
+        this.addStyle();
     }
-
+    addStyle() {
+        // 创建一个新的 <style> 标签
+        const style = document.createElement('style');
+        style.textContent = `
+                video::-webkit-media-controls {
+                    display: none !important;
+                }
+            `;
+        // 将 <style> 标签添加到 <head> 中
+        document.head.appendChild(style);
+    }
     addListener() {
         this.node.addEventListener("mousedown", this.handleMousedown); // mousedown 监听视频元素
         document.addEventListener("mousemove", this.handleMouseover); // mousemove、mouseup 需监听document ，否则鼠标移出画面将不能正常响应
@@ -36,7 +47,6 @@ export default class Touch {
             this.pointerLockElement = this.node;
             this._removePointerLockEvent();
             this.pointerLockElement.addEventListener("click", this._requestPointerLock);
-            // this._addPointerLockEvent();
         }
     }
     private _requestPointerLock = async () => {
@@ -213,6 +223,7 @@ export default class Touch {
         await (this.pointerLockElement as HTMLElement).requestFullscreen();
         await this._requestPointerLock();
         (navigator as any).keyboard && (navigator as any).keyboard.lock();
+        this.node.controls = false
     }
     calcPos(e) {
         const rect = this.node.getBoundingClientRect();
@@ -289,6 +300,7 @@ export default class Touch {
         this.node.removeEventListener("mousedown", this.handleMousedown);
         document.removeEventListener("mousemove", this.handleMouseover);
         document.removeEventListener("mouseup", this.handleMouseup);
+        this._removePointerLockEvent();
         this.hasBind = false;
     }
 }

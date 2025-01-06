@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>mse-relatime-player</title>
     <style>
+              /* 通过 CSS 隐藏控件 */
+
       body {
         display: flex;
         flex-direction: column;
@@ -89,6 +91,9 @@
 
       <label for="fps">fps:</label>
       <input type="text" name="fps" id="fps" />
+      
+      <label for="isPc">isPc</label>
+      <input type="checkbox" id="isPc" name="isPc" checked />
 
       <button onclick="startPlay()">开启视频流</button>
     </div>
@@ -190,9 +195,9 @@
           controlKey: document.getElementById("controlKey").value,
           testId: document.getElementById("testId").value,
           adminKey: document.getElementById("adminKey").value,
+          isPc: document.getElementById("isPc").checked,
           disableAutoRotate: true,
           fps: document.getElementById("fps").value,
-          isPc: true
         });
 
         document.getElementById('videoLoading').style.display = 'block'; // 简易loading
@@ -355,6 +360,7 @@
         const controlKey = localStorage.getItem("controlKey");
         const testId = localStorage.getItem("testId");
         const adminKey = localStorage.getItem("adminKey");
+        const isPc = localStorage.getItem("isPc") || false;
         const fps = localStorage.getItem("fps") || 30;
         const wsUrl = localStorage.getItem("wsUrl") || "wss://api.cloudtest.qq.com/v1/websocket/video";
 
@@ -362,6 +368,7 @@
         document.getElementById("controlKey").value = controlKey;
         document.getElementById("testId").value = testId;
         document.getElementById("adminKey").value = adminKey;
+        document.getElementById("isPc").checked = !!isPc;
         document.getElementById("wsUrl").value = wsUrl;
         document.getElementById("fps").value = fps;
       })();
@@ -371,6 +378,7 @@
         const controlKey = document.getElementById("controlKey").value;
         const testId = document.getElementById("testId").value;
         const adminKey = document.getElementById("adminKey").value;
+        const isPc = document.getElementById("isPc").checked? 'true' : '';
         const wsUrl = document.getElementById("wsUrl").value;
         const fps = document.getElementById("fps").value;
 
@@ -378,6 +386,7 @@
         localStorage.setItem("controlKey", controlKey);
         localStorage.setItem("testId", testId);
         localStorage.setItem("adminKey", adminKey);
+        localStorage.setItem("isPc", isPc);
         localStorage.setItem("wsUrl", wsUrl);
         localStorage.setItem("fps", fps);
         

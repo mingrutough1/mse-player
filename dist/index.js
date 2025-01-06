@@ -1222,6 +1222,7 @@
                         case 2:
                             _a.sent();
                             navigator.keyboard && navigator.keyboard.lock();
+                            this.node.controls = false;
                             return [2 /*return*/];
                     }
                 });
@@ -1254,10 +1255,18 @@
             this.node = node;
             this.rotateValue = rotateValue;
             this.isPc = isPc;
-            this._pcMouseSpeedFactor = mouseSensitivity;
+            this._pcMouseSpeedFactor = mouseSensitivity || 1.0;
             this.sendCommand = sendCommand;
             this.addListener();
+            this.addStyle();
         }
+        Touch.prototype.addStyle = function () {
+            // 创建一个新的 <style> 标签
+            var style = document.createElement('style');
+            style.textContent = "\n                video::-webkit-media-controls {\n                    display: none !important;\n                }\n            ";
+            // 将 <style> 标签添加到 <head> 中
+            document.head.appendChild(style);
+        };
         Touch.prototype.addListener = function () {
             this.node.addEventListener("mousedown", this.handleMousedown); // mousedown 监听视频元素
             document.addEventListener("mousemove", this.handleMouseover); // mousemove、mouseup 需监听document ，否则鼠标移出画面将不能正常响应
@@ -1268,7 +1277,6 @@
                 this.pointerLockElement = this.node;
                 this._removePointerLockEvent();
                 this.pointerLockElement.addEventListener("click", this._requestPointerLock);
-                // this._addPointerLockEvent();
             }
         };
         Touch.prototype.calcPos = function (e) {
@@ -1306,6 +1314,7 @@
             this.node.removeEventListener("mousedown", this.handleMousedown);
             document.removeEventListener("mousemove", this.handleMouseover);
             document.removeEventListener("mouseup", this.handleMouseup);
+            this._removePointerLockEvent();
             this.hasBind = false;
         };
         return Touch;
@@ -1384,6 +1393,7 @@
                         content: "@proxy:ctrl:conn:".concat(JSON.stringify(data))
                     });
                     _this.socket.send(msg);
+                    console.log(msg);
                     return;
                 }
                 _this.socket.send(JSON.stringify(Object.assign(data, {
@@ -1611,6 +1621,9 @@
             this.fps = fps;
             this.isPc = isPc;
             this.mouseSensitivity = mouseSensitivity;
+            if (isPc) {
+                this.fps = 60;
+            }
             this.checkOptions();
         };
         MsePlayer.prototype.checkOptions = function () {
