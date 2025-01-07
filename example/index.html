@@ -26,6 +26,7 @@
       #video {
         max-width: 100%;
         max-height: 100%;
+        object-fit: cover;
       }
       .operate-container {
         display: flex;
@@ -63,7 +64,6 @@
       .operate-container,
       .input-container {
         padding: 10px;
-        background: #f0f0f0;
       }
 
       #videoLoading{
@@ -99,7 +99,9 @@
     </div>
     <div class="container">
       <div class="video-container">
-        <video autoplay muted id="video"></video>
+        <video autoplay muted id="video">
+        </video>
+
         <span id="videoLoading">视频加载中......</span>
       </div>
       <div class="operate-container">
@@ -153,7 +155,7 @@
     </div>
     <audio id="audio" controls></audio>
 
-    <script src="../dist/index.js"></script>
+    <script src="../dist/bundle.umd.js"></script>
     <script>
       const {
         MsePlayer,

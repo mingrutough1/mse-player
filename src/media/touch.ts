@@ -225,6 +225,10 @@ export default class Touch {
         (navigator as any).keyboard && (navigator as any).keyboard.lock();
         this.node.controls = false
     }
+
+    public setMouseSensitivity(value: number) {
+        this._pcMouseSpeedFactor = value;
+    }
     calcPos(e) {
         const rect = this.node.getBoundingClientRect();
         let width = this.node.offsetWidth;

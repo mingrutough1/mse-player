@@ -183,7 +183,6 @@ export default class MsePlayer {
                 }
             )
             this.socket.send(msg);
-            console.log(msg);
             return;
         }
         this.socket.send(
@@ -201,8 +200,11 @@ export default class MsePlayer {
     requestFullScreen = async () => {
         this.touchpad.requestFullScreen();
     }
-
+    setMouseSensitivity = (value: number) => {
+        this.touchpad.setMouseSensitivity(value);
+    }
     rotate = (rotateValue) => {
+        if(this.isPc) return;
         if (typeof rotateValue !== 'number') {
             this.rotateValue++;
         } else {
@@ -389,7 +391,6 @@ export default class MsePlayer {
                 }
                 break;
             default:
-                console.warn("useless message data");
         }
     }
     onSocketError = (e) => {

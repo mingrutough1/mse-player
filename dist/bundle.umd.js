@@ -1396,7 +1396,6 @@
                         content: "@proxy:ctrl:conn:".concat(JSON.stringify(data))
                     });
                     _this.socket.send(msg);
-                    console.log(msg);
                     return;
                 }
                 _this.socket.send(JSON.stringify(Object.assign(data, {
@@ -1417,6 +1416,8 @@
                 _this.touchpad.setMouseSensitivity(value);
             };
             this.rotate = function (rotateValue) {
+                if (_this.isPc)
+                    return;
                 if (typeof rotateValue !== 'number') {
                     _this.rotateValue++;
                 }
@@ -1578,8 +1579,6 @@
                             eventEmiter.emit(EEvent.BridgeCMD, text2);
                         }
                         break;
-                    default:
-                        console.warn("useless message data");
                 }
             };
             this.onSocketError = function (e) {
@@ -1724,3 +1723,4 @@
     exports.MsePlayer = MsePlayer;
 
 }));
+//# sourceMappingURL=bundle.umd.js.map

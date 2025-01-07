@@ -2,7 +2,8 @@
   "name": "mse-realtime-player",
   "version": "1.0.8",
   "description": "",
-  "main": "dist/index.js",
+  "main": "dist/bundle.umd.js",
+  "module": "dist/bundle.esm.js",
   "scripts": {
     "build": "rollup -c",
     "dev": "rollup -c --watch"
