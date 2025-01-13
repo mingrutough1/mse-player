@@ -227,7 +227,7 @@
         });
         player.event.on(EEvent.Clipboard, (e) => {
           console.log("on clipboard", e);
-          document.getElementById("getPhoneClipboard").e = e;
+          document.getElementById("getPhoneClipboard").value = e;
         });
         player.event.on(EEvent.FileUploadVal, (e) => {
           console.log("on file upload", e);

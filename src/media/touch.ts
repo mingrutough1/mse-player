@@ -304,7 +304,7 @@ export default class Touch {
         this.node.removeEventListener("mousedown", this.handleMousedown);
         document.removeEventListener("mousemove", this.handleMouseover);
         document.removeEventListener("mouseup", this.handleMouseup);
-        this._removePointerLockEvent();
+        this.isPc && this._removePointerLockEvent();
         this.hasBind = false;
     }
 }
