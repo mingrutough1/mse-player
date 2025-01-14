@@ -105,6 +105,7 @@
         <span id="videoLoading">视频加载中......</span>
       </div>
       <div class="operate-container">
+        <button onclick="copyDebugAddress()">复制调试地址</button>
         <button onclick="sendCommond(0)">HOME</button>
         <button onclick="sendCommond(1)">MENU</button>
         <button onclick="sendCommond(2)">BACK</button>
@@ -357,25 +358,41 @@
         };
       });
 
+      function copyDebugAddress() {
+        const deviceId = document.getElementById("deviceID").value;
+        const controlKey = document.getElementById("controlKey").value;
+        const testId = document.getElementById("testId").value;
+        const wsUrl = document.getElementById("wsUrl").value;
+        const url = `${location.origin}${location.pathname}?device_id=${deviceId}&control_key=${controlKey}&test_id=${testId}&ws_url=${encodeURIComponent(wsUrl)}`;
+        navigator.clipboard.writeText(url).then(function() {
+                console.log('文本已复制到剪切板');
+            }).catch(function(err) {
+                console.error('复制失败: ', err);
+            });
+      }
+
       (function getLocalData() {
-        const deviceId = localStorage.getItem("deviceId");
-        const controlKey = localStorage.getItem("controlKey");
-        const testId = localStorage.getItem("testId");
+        const params = new URL(document.location).searchParams;
+
+        const deviceId = params.get('device_id') || localStorage.getItem("deviceId");
+        const controlKey = params.get('control_key') || localStorage.getItem("controlKey");
+        const testId = params.get('test_id') || localStorage.getItem("testId");
         const adminKey = localStorage.getItem("adminKey");
         const isPc = localStorage.getItem("isPc") || false;
         const fps = localStorage.getItem("fps") || 30;
-        const wsUrl = localStorage.getItem("wsUrl") || "wss://api.cloudtest.qq.com/v1/websocket/video";
+        const wsUrl = params.get('ws_url') || localStorage.getItem("wsUrl") || "wss://api.cloudtest.qq.com/v1/websocket/video";
 
         document.getElementById("deviceID").value = deviceId;
         document.getElementById("controlKey").value = controlKey;
         document.getElementById("testId").value = testId;
         document.getElementById("adminKey").value = adminKey;
         document.getElementById("isPc").checked = !!isPc;
-        document.getElementById("wsUrl").value = wsUrl;
+        document.getElementById("wsUrl").value = decodeURIComponent(wsUrl);
         document.getElementById("fps").value = fps;
       })();
 
       function savaDataLocal() {
+
         const deviceId = document.getElementById("deviceID").value;
         const controlKey = document.getElementById("controlKey").value;
         const testId = document.getElementById("testId").value;
