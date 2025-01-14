@@ -1374,8 +1374,6 @@
             this.fps = 30;
             this.muxerQuene = [];
             this._rotateValue = ROTATE_MSG["0degrees"];
-            this.socketMaxRetryTimes = 5;
-            this.curSocketRetryTimes = 0;
             this.startRecording = false;
             this.h264Data = [];
             this.disableAutoRotate = false;
@@ -1585,11 +1583,15 @@
             };
             this.onSocketError = function (e) {
                 console.error("websocket error", e);
-                _this.handleSocketAbnormal(EEvent.SocketError, e);
+                eventEmiter.emit(EEvent.SocketError, e);
+                _this.socketHeartBeat && clearInterval(_this.socketHeartBeat);
+                _this.socketCalcInterval && clearInterval(_this.socketCalcInterval);
             };
             this.onSocketClose = function (e) {
                 console.error("websocket close", e);
-                _this.handleSocketAbnormal(EEvent.SocketClose, e);
+                eventEmiter.emit(EEvent.SocketClose, e);
+                _this.socketHeartBeat && clearInterval(_this.socketHeartBeat);
+                _this.socketCalcInterval && clearInterval(_this.socketCalcInterval);
             };
             this.initOption(options);
             this.initVideo();
@@ -1713,18 +1715,6 @@
             this.socket.removeEventListener("error", this.onSocketError);
             this.socket.removeEventListener("close", this.onSocketClose);
             eventEmiter.removeAllListeners();
-        };
-        MsePlayer.prototype.handleSocketAbnormal = function (type, e) {
-            if (this.curSocketRetryTimes >= this.socketMaxRetryTimes) {
-                eventEmiter.emit(type, e);
-                this.socketHeartBeat && clearInterval(this.socketHeartBeat);
-                this.socketCalcInterval && clearInterval(this.socketCalcInterval);
-            }
-            else {
-                this.curSocketRetryTimes++;
-                console.log('socket-retry');
-                this.initWebSocket();
-            }
         };
         return MsePlayer;
     }());
