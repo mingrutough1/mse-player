@@ -28,6 +28,8 @@ export default class MsePlayer {
     socket: WebSocket;
     socketHeartBeat: number;
     socketCalcInterval: number;
+    socketMaxRetryTimes: number = 5;
+    curSocketRetryTimes: number = 0;
 
     startRecording: Boolean = false;
     h264Data = [];
@@ -393,16 +395,25 @@ export default class MsePlayer {
             default:
         }
     }
+
+    handleSocketAbnormal(type, e) {
+        if(this.curSocketRetryTimes >= this.socketMaxRetryTimes) {
+            eventEmiter.emit(type, e);
+            this.socketHeartBeat && clearInterval(this.socketHeartBeat);
+            this.socketCalcInterval && clearInterval(this.socketCalcInterval);
+        } else {
+            this.curSocketRetryTimes++;
+            console.log('socket-retry');
+            this.initWebSocket();
+        }
+    }
+
     onSocketError = (e) => {
         console.error("websocket error", e);
-        eventEmiter.emit(EEvent.SocketError, e);
-        this.socketHeartBeat && clearInterval(this.socketHeartBeat);
-        this.socketCalcInterval && clearInterval(this.socketCalcInterval);
+        this.handleSocketAbnormal(EEvent.SocketError, e);
     }
     onSocketClose = (e) => {
         console.error("websocket close", e);
-        eventEmiter.emit(EEvent.SocketClose, e);
-        this.socketHeartBeat && clearInterval(this.socketHeartBeat);
-        this.socketCalcInterval && clearInterval(this.socketCalcInterval);
+        this.handleSocketAbnormal(EEvent.SocketClose, e);
     }
 }
