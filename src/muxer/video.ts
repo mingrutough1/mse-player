@@ -23,6 +23,15 @@ export class VideoMuxer {
 
     addListener() {
         window.addEventListener('resize', this.setVideoElementBound);
+        document.addEventListener('visibilitychange', () => {
+            if(document.visibilityState === 'visible') {
+                this.node.currentTime = this.node.buffered.end(0) - 0.001;
+                // this.muxer.reset();
+                // this.sendCommand({
+                //     cmd: CMD.StartStream,
+                // });
+            }
+        });
         this.node.addEventListener('loadeddata', this.handleVideoEvent);
     }
 
@@ -59,8 +68,6 @@ export class VideoMuxer {
                 debug: false,
                 fps: this.fps,
                 flushingTime: 0,
-                checkDelay: 5000,
-                maxDelay: 1000,
                 onReady: isReset => {
                     this.muxer.mediaSource.duration = Number.POSITIVE_INFINITY;
                     if (isReset) {
