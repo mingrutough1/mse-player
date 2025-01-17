@@ -25,11 +25,11 @@ export class VideoMuxer {
         window.addEventListener('resize', this.setVideoElementBound);
         document.addEventListener('visibilitychange', () => {
             if(document.visibilityState === 'visible') {
-                this.node.currentTime = this.node.buffered.end(0) - 0.001;
-                // this.muxer.reset();
-                // this.sendCommand({
-                //     cmd: CMD.StartStream,
-                // });
+                eventEmiter.emit(EEvent.VideoReset);
+                this.muxer.reset();
+                this.sendCommand({
+                    cmd: CMD.StartStream,
+                });
             }
         });
         this.node.addEventListener('loadeddata', this.handleVideoEvent);

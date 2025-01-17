@@ -14,6 +14,7 @@ var EEvent;
     EEvent["FileUploadVal"] = "fileuploadval";
     EEvent["BridgeCMD"] = "bridgecmd";
     EEvent["VideoInfo"] = "videoinfo";
+    EEvent["VideoReset"] = "videoreset";
 })(EEvent || (EEvent = {}));
 var CMD;
 (function (CMD) {
@@ -654,7 +655,17 @@ var VideoMuxer = /** @class */ (function () {
         this.node.style.cursor = "url(".concat(cursorImg, "), auto");
     }
     VideoMuxer.prototype.addListener = function () {
+        var _this = this;
         window.addEventListener('resize', this.setVideoElementBound);
+        document.addEventListener('visibilitychange', function () {
+            if (document.visibilityState === 'visible') {
+                eventEmiter.emit(EEvent.VideoReset);
+                _this.muxer.reset();
+                _this.sendCommand({
+                    cmd: CMD.StartStream,
+                });
+            }
+        });
         this.node.addEventListener('loadeddata', this.handleVideoEvent);
     };
     VideoMuxer.prototype.clean = function () {
@@ -671,8 +682,6 @@ var VideoMuxer = /** @class */ (function () {
                 debug: false,
                 fps: _this.fps,
                 flushingTime: 0,
-                checkDelay: 5000,
-                maxDelay: 1000,
                 onReady: function (isReset) {
                     _this.muxer.mediaSource.duration = Number.POSITIVE_INFINITY;
                     if (isReset) ;

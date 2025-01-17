@@ -220,6 +220,10 @@
         player.event.on(EEvent.Rotate, (e) => {
           console.log("on rotate", e);
         });
+        player.event.on(EEvent.VideoReset, (e) => {
+          console.log("on rest", e);
+          document.getElementById('videoLoading').style.display = 'block'; // loading 开始
+        });
         player.event.on(EEvent.Capture, (e) => {
           console.log("on capture", e);
         });

@@ -13,6 +13,7 @@ export enum EEvent{
   FileUploadVal = 'fileuploadval',
   BridgeCMD = 'bridgecmd',
   VideoInfo = 'videoinfo',
+  VideoReset = 'videoreset'
 }
 
 export enum CMD {
