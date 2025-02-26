@@ -656,7 +656,7 @@
             this.fps = fps;
             this.sendCommand = sendCommand;
             this.addListener();
-            this.node.style.cursor = "url(".concat(cursorImg, "), auto");
+            this.node.style.cursor = "url(".concat(cursorImg, ") 12 12, default");
         }
         VideoMuxer.prototype.addListener = function () {
             var _this = this;

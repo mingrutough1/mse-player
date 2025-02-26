@@ -18,7 +18,8 @@ export class VideoMuxer {
         this.fps = fps;
         this.sendCommand = sendCommand;
         this.addListener();
-        this.node.style.cursor = `url(${cursorImg}), auto`;
+        this.node.style.cursor = `url(${cursorImg}) 12 12, default`;
+
     }
 
     addListener() {
